@@ -35,9 +35,7 @@ import {
   ModalBody,
   ModalCloseButton,
   useDisclosure,
-  Radio,
-  RadioGroup,
-  Stack,
+
   Divider,
 } from '@chakra-ui/react';
 import {
@@ -54,6 +52,32 @@ import {
 } from 'react-icons/md';
 import Card from '@/components/card/Card';
 import { useLanguage } from '@/contexts/LanguageContext';
+
+// Custom SVG Icons for Garment Types
+const TshirtIcon = ({ color = "currentColor", ...props }: any) => (
+  <svg viewBox="0 0 512 512" {...props} style={{ color }}>
+    <path 
+      d="M314.56,48S291.78,56,256,56s-58.56-8-58.56-8a31.94,31.94,0,0,0-10.57,1.8L32,104l16.63,88,48.88,5.52A24,24,0,0,1,118.8,222.1L112,464H400l-6.8-241.9a24,24,0,0,1,21.29-24.58L463.37,192,480,104,325.13,49.8A31.94,31.94,0,0,0,314.56,48Z" 
+      style={{fill:"none", stroke:color, strokeLinecap:"round", strokeLinejoin:"round", strokeWidth:"32px"}}
+    />
+    <path 
+      d="M333.31,52.66a80,80,0,0,1-154.62,0" 
+      style={{fill:"none", stroke:color, strokeLinecap:"round", strokeLinejoin:"round", strokeWidth:"32px"}}
+    />
+  </svg>
+);
+
+const DressIcon = ({ color = "currentColor", ...props }: any) => (
+  <svg viewBox="0 0 64 64" {...props} style={{ color }}>
+    <path d="M53.7861,48.67a83.9378,83.9378,0,0,0-9.9873-16.1528,1,1,0,1,0-1.6,1.2012,84.6157,84.6157,0,0,1,9.41,14.9985,37.5263,37.5263,0,0,1-19.4371,5.2039l-.0014,0c-.0114.001-.03,0-.044.0009a2.4537,2.4537,0,0,1-.2978-.0009l-.0012,0a37.6732,37.6732,0,0,1-19.4363-5.2053c2.9645-6.3487,7.4341-12.49,11.5045-17.7368A.9277.9277,0,0,0,24,31h2.16a29.6034,29.6034,0,0,0-2.1077,4.6836,1,1,0,1,0,1.8964.6328A29.9766,29.9766,0,0,1,28.4634,31h1.1752A13.8417,13.8417,0,0,0,29,34a1,1,0,0,0,2,0,16.5232,16.5232,0,0,1,.73-3h3.7256A18.3891,18.3891,0,0,1,37.06,34.34,1,1,0,1,0,38.94,33.66,20.6867,20.6867,0,0,0,37.7567,31h2.8566a.9944.9944,0,0,0,.3551-.0719.947.947,0,0,0,.1145-.0615.97.97,0,0,0,.1437-.077c.0169-.0133.0244-.0329.04-.047a.9728.9728,0,0,0,.1332-.155.6636.6636,0,0,0,.1593-.3251.9717.9717,0,0,0,.0409-.2031c.0013-.0208.012-.0383.012-.0594a.929.929,0,0,0-.0242-.12.7825.7825,0,0,0-.1328-.3858.9384.9384,0,0,0-.0539-.1081,5.9843,5.9843,0,0,1-1.08-2.5263c.3017-1.2466.8965-3.6206,1.498-5.5157A20.8205,20.8205,0,0,0,43,14.7378V11a3,3,0,0,0-6,0v4.3276a19.5534,19.5534,0,0,0-5,3.3,19.5534,19.5534,0,0,0-5-3.3V11a3,3,0,0,0-6,0l.001,3.7705a20.7612,20.7612,0,0,0,1.18,6.5742c.1943.61.3857,1.2666.5693,1.9224a1,1,0,1,0,1.9258-.5381c-.1895-.6792-.3887-1.3584-.5889-1.9893A18.7781,18.7781,0,0,1,23,14.7378V11a1,1,0,0,1,2,0v5a1,1,0,0,0,.6748.9458,16.8392,16.8392,0,0,1,5.6231,3.7666,1,1,0,0,0,1.4042,0,17.0354,17.0354,0,0,1,5.6231-3.7666A1,1,0,0,0,39,16V11a1,1,0,0,1,2,0l.001,3.7051a18.8372,18.8372,0,0,1-1.0879,6.0342c-.5421,1.7081-1.0673,3.7368-1.44,5.2607H24.6758v.0105a.9937.9937,0,0,0-1,.9216,6.4031,6.4031,0,0,1-1.0772,2.4536C18.2178,35.0156,13.32,41.71,10.2139,48.67a1,1,0,0,0,.3193,1.2124c.3359.2485,8.3291,6.04,21.3184,6.0391.0487,0,.0988,0,.1484-.0005s.0992.0005.1484.0005c12.9883,0,20.9825-5.7906,21.3184-6.0391A1.0006,1.0006,0,0,0,53.7861,48.67ZM38.8984,29H25.1063a8.39,8.39,0,0,0,.3793-1H38.52A7.7919,7.7919,0,0,0,38.8984,29Z" fill={color}/>
+  </svg>
+);
+
+const PantsIcon = ({ color = "currentColor", ...props }: any) => (
+  <svg viewBox="0 0 64 64" {...props} style={{ color }}>
+    <path d="M32,33l6.7,28h14.4L47.9,3H16.1l-5.2,58h14.4L32,33z M45.2,14.8c0.4-0.4,1-0.7,1.6-0.8l0.4,4.9c-1.6-0.2-2.9-1.1-2.9-2.3   C44.4,15.9,44.7,15.3,45.2,14.8z M46.1,5l0.5,6.2H17.4L17.9,5H46.1z M17.1,14c0.8,0.1,1.5,0.4,2.1,0.9c0.6,0.5,0.9,1.1,0.9,1.7   c-0.1,1.3-1.6,2.3-3.4,2.3L17.1,14z M13.1,59l3.4-38.1c0.1,0,0.1,0,0.2,0c2.9,0,5.3-1.9,5.4-4.3c0.1-1.3-0.5-2.4-1.6-3.3   c-0.1-0.1-0.2-0.1-0.2-0.2H31V18h2v-4.8h11.2c-0.1,0.1-0.2,0.1-0.2,0.2c-1.1,0.9-1.6,2.1-1.6,3.3c0.1,2.3,2.3,4.1,5.1,4.2L50.9,59   H40.3L32,24.5L23.7,59H13.1z" fill={color}/>
+  </svg>
+);
 
 // Types
 type GarmentType = 'upper_body' | 'lower_body' | 'dresses';
@@ -440,10 +464,10 @@ export default function VirtualTryOnPage() {
         {/* Header */}
         <Box>
           <Text color={textColor} fontSize="2xl" fontWeight="700" mb="8px">
-            Virtual Try-On con IA
+            {t('virtualTryOn.aiTitle')}
           </Text>
           <Text color={gray} fontSize="md" fontWeight="400">
-            Prueba ropa virtualmente usando inteligencia artificial avanzada
+            {t('virtualTryOn.aiSubtitle')}
           </Text>
         </Box>
 
@@ -453,26 +477,30 @@ export default function VirtualTryOnPage() {
             <Badge 
               colorScheme={currentStep === 'setup' ? 'blue' : 'gray'}
               variant={currentStep === 'setup' ? 'solid' : 'outline'}
+              color={currentStep === 'setup' ? 'white' : undefined}
             >
-              1. Seleccionar Tipo de Prenda
+              {t('virtualTryOn.step1')}
             </Badge>
             <Badge 
               colorScheme={currentStep === 'upload' ? 'blue' : 'gray'}
               variant={currentStep === 'upload' ? 'solid' : 'outline'}
+              color={currentStep === 'upload' ? 'white' : undefined}
             >
-              2. Subir Imágenes
+              {t('virtualTryOn.step2')}
             </Badge>
             <Badge 
               colorScheme={currentStep === 'processing' ? 'blue' : 'gray'}
               variant={currentStep === 'processing' ? 'solid' : 'outline'}
+              color={currentStep === 'processing' ? 'white' : undefined}
             >
-              3. Procesando
+              {t('virtualTryOn.step3')}
             </Badge>
             <Badge 
               colorScheme={currentStep === 'result' ? 'green' : 'gray'}
               variant={currentStep === 'result' ? 'solid' : 'outline'}
+              color={currentStep === 'result' ? 'white' : undefined}
             >
-              4. Resultado
+              {t('virtualTryOn.step4')}
             </Badge>
           </HStack>
         </Card>
@@ -483,31 +511,136 @@ export default function VirtualTryOnPage() {
             <Card>
               <VStack spacing="20px" align="stretch">
                 <Text color={textColor} fontSize="lg" fontWeight="600" textAlign="center">
-                  ¿Qué tipo de prenda quieres probar?
+                  {t('virtualTryOn.garmentTypeQuestion')}
                 </Text>
                 
-                <RadioGroup value={garmentType} onChange={(value) => setGarmentType(value as GarmentType)}>
-                  <Stack direction="row" spacing="24px" justify="center" wrap="wrap">
-                    <Radio value="upper_body" size="lg" colorScheme="blue">
-                      <VStack spacing="8px" align="center">
-                        <Text fontWeight="600">Parte Superior</Text>
-                        <Text fontSize="sm" color={gray}>Camisetas, camisas, sudaderas</Text>
-                      </VStack>
-                    </Radio>
-                    <Radio value="lower_body" size="lg" colorScheme="blue">
-                      <VStack spacing="8px" align="center">
-                        <Text fontWeight="600">Parte Inferior</Text>
-                        <Text fontSize="sm" color={gray}>Pantalones, jeans, shorts</Text>
-                      </VStack>
-                    </Radio>
-                    <Radio value="dresses" size="lg" colorScheme="blue">
-                      <VStack spacing="8px" align="center">
-                        <Text fontWeight="600">Vestidos</Text>
-                        <Text fontSize="sm" color={gray}>Vestidos casuales y formales</Text>
-                      </VStack>
-                    </Radio>
-                  </Stack>
-                </RadioGroup>
+                <HStack spacing="16px" justify="center" wrap="wrap">
+                  {/* Upper Body Option */}
+                  <Box
+                    p="20px"
+                    borderRadius="16px"
+                    border="3px solid"
+                    borderColor={garmentType === 'upper_body' ? 'blue.500' : borderColor}
+                    bg={garmentType === 'upper_body' ? 'blue.500' : cardBg}
+                    cursor="pointer"
+                    onClick={() => setGarmentType('upper_body')}
+                    _hover={{
+                      transform: 'translateY(-2px)',
+                      boxShadow: 'lg',
+                      borderColor: 'blue.400'
+                    }}
+                    transition="all 0.2s"
+                    minW="140px"
+                    boxShadow="md"
+                  >
+                    <VStack spacing="12px" align="center">
+                      <TshirtIcon 
+                        color={garmentType === 'upper_body' ? 'white' : 'blue.500'} 
+                        width="48px" 
+                        height="48px" 
+                        style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }}
+                      />
+                      <Text 
+                        fontWeight="700" 
+                        fontSize="md" 
+                        color={garmentType === 'upper_body' ? 'white' : textColor}
+                      >
+                        {t('virtualTryOn.upperBody')}
+                      </Text>
+                      <Text 
+                        fontSize="xs" 
+                        color={garmentType === 'upper_body' ? 'white' : gray} 
+                        textAlign="center"
+                      >
+                        {t('virtualTryOn.upperBodyDesc')}
+                      </Text>
+                    </VStack>
+                  </Box>
+
+                  {/* Lower Body Option */}
+                  <Box
+                    p="20px"
+                    borderRadius="16px"
+                    border="3px solid"
+                    borderColor={garmentType === 'lower_body' ? 'blue.500' : borderColor}
+                    bg={garmentType === 'lower_body' ? 'blue.500' : cardBg}
+                    cursor="pointer"
+                    onClick={() => setGarmentType('lower_body')}
+                    _hover={{
+                      transform: 'translateY(-2px)',
+                      boxShadow: 'lg',
+                      borderColor: 'blue.400'
+                    }}
+                    transition="all 0.2s"
+                    minW="140px"
+                    boxShadow="md"
+                  >
+                    <VStack spacing="12px" align="center">
+                      <PantsIcon 
+                        color={garmentType === 'lower_body' ? 'white' : 'blue.500'} 
+                        width="48px" 
+                        height="48px" 
+                        style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }}
+                      />
+                      <Text 
+                        fontWeight="700" 
+                        fontSize="md" 
+                        color={garmentType === 'lower_body' ? 'white' : textColor}
+                      >
+                        {t('virtualTryOn.lowerBody')}
+                      </Text>
+                      <Text 
+                        fontSize="xs" 
+                        color={garmentType === 'lower_body' ? 'white' : gray} 
+                        textAlign="center"
+                      >
+                        {t('virtualTryOn.lowerBodyDesc')}
+                      </Text>
+                    </VStack>
+                  </Box>
+
+                  {/* Dresses Option */}
+                  <Box
+                    p="20px"
+                    borderRadius="16px"
+                    border="3px solid"
+                    borderColor={garmentType === 'dresses' ? 'blue.500' : borderColor}
+                    bg={garmentType === 'dresses' ? 'blue.500' : cardBg}
+                    cursor="pointer"
+                    onClick={() => setGarmentType('dresses')}
+                    _hover={{
+                      transform: 'translateY(-2px)',
+                      boxShadow: 'lg',
+                      borderColor: 'blue.400'
+                    }}
+                    transition="all 0.2s"
+                    minW="140px"
+                    boxShadow="md"
+                  >
+                    <VStack spacing="12px" align="center">
+                      <DressIcon 
+                        color={garmentType === 'dresses' ? 'white' : 'blue.500'} 
+                        width="48px" 
+                        height="48px" 
+                        style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }}
+                      />
+                      <Text 
+                        fontWeight="700" 
+                        fontSize="md" 
+                        color={garmentType === 'dresses' ? 'white' : textColor}
+                      >
+                        {t('virtualTryOn.dresses')}
+                      </Text>
+                      <Text 
+                        fontSize="xs" 
+                        color={garmentType === 'dresses' ? 'white' : gray} 
+                        textAlign="center"
+                      >
+                        {t('virtualTryOn.dressesDesc')}
+                      </Text>
+                    </VStack>
+                  </Box>
+                </HStack>
 
                 <Divider />
 
@@ -517,8 +650,7 @@ export default function VirtualTryOnPage() {
                   onClick={() => setCurrentStep('upload')}
                   rightIcon={<Icon as={MdAutoAwesome} />}
                 >
-                  Continuar con {garmentType === 'upper_body' ? 'Parte Superior' : 
-                                garmentType === 'lower_body' ? 'Parte Inferior' : 'Vestidos'}
+                  {t('virtualTryOn.continueButton')}
                 </Button>
               </VStack>
             </Card>
@@ -533,9 +665,9 @@ export default function VirtualTryOnPage() {
               <Alert status="success" borderRadius="12px">
                 <AlertIcon as={MdCheckCircle} />
                 <Box>
-                  <AlertTitle>Lo que funciona mejor:</AlertTitle>
+                  <AlertTitle>{t('virtualTryOn.whatWorksBestTitle')}</AlertTitle>
                   <AlertDescription>
-                    Imagen frontal de la prenda con buena iluminación, sobre superficie plana, vista desde arriba, sin arrugas
+                    {t('virtualTryOn.whatWorksBestDescription')}
                   </AlertDescription>
                 </Box>
               </Alert>
@@ -543,9 +675,9 @@ export default function VirtualTryOnPage() {
               <Alert status="warning" borderRadius="12px">
                 <AlertIcon as={MdWarning} />
                 <Box>
-                  <AlertTitle>Evita:</AlertTitle>
+                  <AlertTitle>{t('virtualTryOn.avoidTitle')}</AlertTitle>
                   <AlertDescription>
-                    Mala iluminación, mangas dobladas, tomas en ángulo, fondos desordenados, sombras
+                    {t('virtualTryOn.avoidDescription')}
                   </AlertDescription>
                 </Box>
               </Alert>
@@ -559,7 +691,7 @@ export default function VirtualTryOnPage() {
                     <HStack>
                   <Icon as={MdPerson} w="20px" h="20px" color="blue.500" />
                   <Text color={textColor} fontSize="lg" fontWeight="600">
-                        Seleccionar Modelo
+                        {t('virtualTryOn.selectModel')}
                   </Text>
                     </HStack>
                     <Button
@@ -567,7 +699,7 @@ export default function VirtualTryOnPage() {
                       variant="outline"
                       onClick={onModelModalOpen}
                     >
-                      Ver Ejemplos
+                      {t('virtualTryOn.viewExamples')}
                     </Button>
                 </HStack>
                 
@@ -599,10 +731,10 @@ export default function VirtualTryOnPage() {
                     <VStack spacing="12px">
                       <Icon as={MdCloudUpload} w="32px" h="32px" color={gray} />
                       <Text color={gray} fontSize="sm" textAlign="center">
-                          Arrastra una imagen o haz clic para subir
+                          {t('virtualTryOn.dragOrClickToUpload')}
                         </Text>
                         <Text color={gray} fontSize="xs" textAlign="center">
-                          O usa uno de nuestros modelos de ejemplo
+                          {t('virtualTryOn.orUseExample')}
                       </Text>
                     </VStack>
                   </Box>
@@ -636,7 +768,7 @@ export default function VirtualTryOnPage() {
                           left="8px"
                           colorScheme="blue"
                         >
-                          Ejemplo
+                          {t('virtualTryOn.exampleBadge')}
                         </Badge>
                       )}
                   </Box>
@@ -651,7 +783,7 @@ export default function VirtualTryOnPage() {
                     <HStack>
                   <Icon as={MdOutlineCheckroom} w="20px" h="20px" color="purple.500" />
                   <Text color={textColor} fontSize="lg" fontWeight="600">
-                        Seleccionar Prenda
+                        {t('virtualTryOn.selectGarment')}
                   </Text>
                     </HStack>
                     <Button
@@ -659,7 +791,7 @@ export default function VirtualTryOnPage() {
                       variant="outline"
                       onClick={onGarmentModalOpen}
                     >
-                      Ver Ejemplos
+                      {t('virtualTryOn.viewExamples')}
                     </Button>
                 </HStack>
                 
@@ -691,11 +823,10 @@ export default function VirtualTryOnPage() {
                     <VStack spacing="12px">
                       <Icon as={MdCloudUpload} w="32px" h="32px" color={gray} />
                       <Text color={gray} fontSize="sm" textAlign="center">
-                          Arrastra una imagen de {garmentType === 'upper_body' ? 'parte superior' : 
-                                                   garmentType === 'lower_body' ? 'parte inferior' : 'vestido'}
+                          {t('virtualTryOn.dragOrClickToUploadGarment')}
                         </Text>
                         <Text color={gray} fontSize="xs" textAlign="center">
-                          O usa uno de nuestros ejemplos
+                          {t('virtualTryOn.orUseExample')}
                       </Text>
                     </VStack>
                   </Box>
@@ -729,7 +860,7 @@ export default function VirtualTryOnPage() {
                           left="8px"
                           colorScheme="purple"
                         >
-                          Ejemplo
+                          {t('virtualTryOn.exampleBadge')}
                         </Badge>
                       )}
                   </Box>
@@ -746,7 +877,7 @@ export default function VirtualTryOnPage() {
                   size="lg"
                   onClick={() => setCurrentStep('setup')}
                 >
-                  Volver
+                  {t('virtualTryOn.backButton')}
                 </Button>
                 <Button
                   leftIcon={<Icon as={MdAutoAwesome} />}
@@ -755,7 +886,7 @@ export default function VirtualTryOnPage() {
                   isDisabled={!humanImage || !garmentImage}
                   onClick={startTryOn}
                 >
-                  Comenzar Prueba Virtual
+                  {t('virtualTryOn.startVirtualTryOnButton')}
                 </Button>
                 <Button
                   variant="outline"
@@ -763,7 +894,7 @@ export default function VirtualTryOnPage() {
                   onClick={resetTryOn}
                   isDisabled={!humanImage && !garmentImage}
                 >
-                  Limpiar Todo
+                  {t('virtualTryOn.clearAllButton')}
                 </Button>
               </HStack>
             </Card>
@@ -776,7 +907,7 @@ export default function VirtualTryOnPage() {
             <VStack spacing="24px" py="40px">
               <Icon as={MdAutoAwesome} w="48px" h="48px" color="blue.500" />
               <Text color={textColor} fontSize="xl" fontWeight="600">
-                {isUploading ? 'Subiendo imágenes...' : 'Procesando con IA...'}
+                {isUploading ? t('virtualTryOn.uploadingImages') : t('virtualTryOn.processingWithAI')}
               </Text>
               
               {isUploading ? (
@@ -792,7 +923,7 @@ export default function VirtualTryOnPage() {
                   />
                   {tryOnResult?.queuePosition && (
                     <Text color={gray} fontSize="sm">
-                      Posición en cola: {tryOnResult.queuePosition}
+                      {t('virtualTryOn.queuePosition')}: {tryOnResult.queuePosition}
                     </Text>
                   )}
                 </>
@@ -800,8 +931,8 @@ export default function VirtualTryOnPage() {
               
               <Text color={gray} fontSize="sm" textAlign="center" maxW="400px">
                 {isUploading ? 
-                  'Subiendo tus imágenes a nuestros servidores...' : 
-                  'Nuestra IA está procesando las imágenes para crear tu prueba virtual. Esto puede tomar unos minutos.'
+                  t('virtualTryOn.uploadingImagesDescription') : 
+                  t('virtualTryOn.aiProcessingDescription')
                 }
               </Text>
             </VStack>
@@ -817,7 +948,7 @@ export default function VirtualTryOnPage() {
                 <Card>
                   <VStack spacing="16px">
                     <Text color={textColor} fontSize="lg" fontWeight="600">
-                      ¡Tu Resultado de Prueba Virtual!
+                      {t('virtualTryOn.virtualTryOnResultTitle')}
                     </Text>
                     <Box
                       w="100%"
@@ -838,7 +969,7 @@ export default function VirtualTryOnPage() {
                       />
                     </Box>
                     <Text color={gray} fontSize="sm" textAlign="center" maxW="400px">
-                      Tu resultado está listo. ¿Te gusta cómo se ve la prenda?
+                      {t('virtualTryOn.resultReady')}
                     </Text>
                   </VStack>
                 </Card>
@@ -850,7 +981,7 @@ export default function VirtualTryOnPage() {
                     size="lg"
                     onClick={downloadResult}
                   >
-                    Descargar Resultado
+                    {t('virtualTryOn.downloadResultButton')}
                   </Button>
                   <Button
                     leftIcon={<Icon as={MdRefresh} />}
@@ -858,7 +989,7 @@ export default function VirtualTryOnPage() {
                     size="lg"
                     onClick={resetTryOn}
                   >
-                    Probar Otra Prenda
+                    {t('virtualTryOn.tryAnotherGarmentButton')}
                   </Button>
                 </HStack>
               </>
@@ -867,24 +998,24 @@ export default function VirtualTryOnPage() {
               <Card>
                 <VStack spacing="16px">
                   <Text color="red.500" fontSize="lg" fontWeight="600">
-                    Error en Procesamiento
+                    {t('virtualTryOn.processingErrorTitle')}
                   </Text>
                   <Text color={textColor} fontSize="md" textAlign="center" maxW="600px">
                     {(tryOnResult as any)?.error?.details || 
-                     'Hubo un problema al procesar las imágenes. Esto suele ocurrir con imágenes incompatibles.'}
+                     t('virtualTryOn.processingErrorDescription')}
                   </Text>
                   
                   {(tryOnResult as any)?.error?.suggestions && (
                     <VStack spacing="8px" align="start" maxW="600px">
                       <Text color={textColor} fontSize="sm" fontWeight="600">
-                        Sugerencias para mejores resultados:
+                        {t('virtualTryOn.suggestionsTitle')}
                       </Text>
                       {((tryOnResult as any).error.suggestions as string[]).map((suggestion: string, index: number) => (
                         <Text key={index} color={gray} fontSize="sm" ml="16px">
-                          • {suggestion === 'Try using example images first' ? 'Prueba primero con las imágenes de ejemplo' :
-                             suggestion === 'Ensure uploaded images show a clear full-body person' ? 'Asegúrate de que las imágenes muestren claramente a una persona de cuerpo completo' :
-                             suggestion === 'Use images with good lighting and contrast' ? 'Usa imágenes con buena iluminación y contraste' :
-                             suggestion === 'Avoid images with complex backgrounds' ? 'Evita imágenes con fondos complejos' :
+                          • {suggestion === 'Try using example images first' ? t('virtualTryOn.tryExampleImagesFirst') :
+                             suggestion === 'Ensure uploaded images show a clear full-body person' ? t('virtualTryOn.ensureFullBodyPerson') :
+                             suggestion === 'Use images with good lighting and contrast' ? t('virtualTryOn.useGoodLightingContrast') :
+                             suggestion === 'Avoid images with complex backgrounds' ? t('virtualTryOn.avoidComplexBackgrounds') :
                              suggestion}
                         </Text>
                       ))}
@@ -892,7 +1023,7 @@ export default function VirtualTryOnPage() {
                   )}
                   
                   <Text color={gray} fontSize="xs" textAlign="center" maxW="500px" mt="16px">
-                    Error técnico: {(tryOnResult as any)?.error?.message || 'Error desconocido'}
+                    {t('virtualTryOn.technicalError')}: {(tryOnResult as any)?.error?.message || t('virtualTryOn.unknownError')}
                   </Text>
                   
                   <Button
@@ -902,7 +1033,7 @@ export default function VirtualTryOnPage() {
                     onClick={resetTryOn}
                     mt="16px"
                   >
-                    Intentar de Nuevo
+                    {t('virtualTryOn.tryAgainButton')}
                   </Button>
                 </VStack>
               </Card>
@@ -913,10 +1044,10 @@ export default function VirtualTryOnPage() {
         {/* Models Modal */}
         <Modal isOpen={isModelModalOpen} onClose={onModelModalClose} size="4xl">
           <ModalOverlay />
-          <ModalContent>
-            <ModalHeader>Seleccionar Modelo de Ejemplo</ModalHeader>
+          <ModalContent bg={cardBg} borderRadius="16px">
+            <ModalHeader>{t('virtualTryOn.selectModelExampleModalTitle')}</ModalHeader>
             <ModalCloseButton />
-            <ModalBody>
+            <ModalBody bg={useColorModeValue('white', 'gray.800')} borderRadius="12px" p="24px">
               <SimpleGrid columns={{ base: 2, md: 4 }} spacing="16px">
                 {exampleModels.map((model) => (
                   <Box
@@ -947,7 +1078,7 @@ export default function VirtualTryOnPage() {
             </ModalBody>
             <ModalFooter>
               <Button variant="ghost" onClick={onModelModalClose}>
-                Cerrar
+                {t('virtualTryOn.closeButton')}
               </Button>
             </ModalFooter>
           </ModalContent>
@@ -956,15 +1087,15 @@ export default function VirtualTryOnPage() {
         {/* Garments Modal */}
         <Modal isOpen={isGarmentModalOpen} onClose={onGarmentModalClose} size="4xl">
           <ModalOverlay />
-          <ModalContent>
+          <ModalContent bg={cardBg} borderRadius="16px">
             <ModalHeader>
-              Seleccionar Prenda de Ejemplo - {
-                garmentType === 'upper_body' ? 'Parte Superior' : 
-                garmentType === 'lower_body' ? 'Parte Inferior' : 'Vestidos'
+              {t('virtualTryOn.selectGarmentExampleModalTitle')} - {
+                garmentType === 'upper_body' ? t('virtualTryOn.upperBody') : 
+                garmentType === 'lower_body' ? t('virtualTryOn.lowerBody') : t('virtualTryOn.dresses')
               }
             </ModalHeader>
             <ModalCloseButton />
-            <ModalBody>
+            <ModalBody bg={useColorModeValue('white', 'gray.800')} borderRadius="12px" p="24px">
               <SimpleGrid columns={{ base: 2, md: 4 }} spacing="16px">
                 {filteredGarments.map((garment) => (
                   <Box
@@ -995,7 +1126,7 @@ export default function VirtualTryOnPage() {
             </ModalBody>
             <ModalFooter>
               <Button variant="ghost" onClick={onGarmentModalClose}>
-                Cerrar
+                {t('virtualTryOn.closeButton')}
               </Button>
             </ModalFooter>
           </ModalContent>

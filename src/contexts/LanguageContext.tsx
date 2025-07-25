@@ -84,8 +84,71 @@ const translations: Record<Language, Record<string, string>> = {
     'virtualTryOn.downloadSuccess': 'Success! Your image has been downloaded.',
     'virtualTryOn.downloadManual': 'Download Again',
     'virtualTryOn.pleaseUploadBoth': 'Please upload both a model image and a clothing item.',
-    'virtualTryOn.tipsTitle': 'Tips for Best Results',
+    'virtualTryOn.suggestionsTitle': 'Suggestions for better results:',
     'virtualTryOn.tipsDescription': 'Use clear, high-quality images with good lighting. The model should be facing forward, and the clothing item should be clearly visible against a neutral background.',
+    
+    // Virtual Try-On AI Title and Steps
+    'virtualTryOn.aiTitle': 'AI-Powered Virtual Try-On',
+    'virtualTryOn.aiSubtitle': 'Try on clothing virtually using advanced artificial intelligence',
+    'virtualTryOn.step1': '1. Select Garment Type',
+    'virtualTryOn.step2': '2. Upload Images',
+    'virtualTryOn.step3': '3. Processing',
+    'virtualTryOn.step4': '4. Result',
+    
+    // Garment Types
+    'virtualTryOn.garmentTypeQuestion': 'What type of garment do you want to try?',
+    'virtualTryOn.upperBody': 'Upper Body',
+    'virtualTryOn.upperBodyDesc': 'T-shirts, shirts, hoodies',
+    'virtualTryOn.lowerBody': 'Lower Body',
+    'virtualTryOn.lowerBodyDesc': 'Pants, jeans, shorts',
+    'virtualTryOn.dresses': 'Dresses',
+    'virtualTryOn.dressesDesc': 'Casual and formal dresses',
+    'virtualTryOn.continueWith': 'Continue with',
+    'virtualTryOn.continueButton': 'Continue with Upper Body',
+    
+    // Upload Section
+    'virtualTryOn.selectModel': 'Select Model',
+    'virtualTryOn.selectGarment': 'Select Garment',
+    'virtualTryOn.viewExamples': 'View Examples',
+    'virtualTryOn.dragOrClickToUpload': 'Drag an image or click to upload',
+    'virtualTryOn.dragOrClickToUploadGarment': 'Drag a garment image or click to upload',
+    'virtualTryOn.orUseExample': 'Or use one of our examples',
+    'virtualTryOn.backButton': 'Back',
+    'virtualTryOn.startVirtualTryOnButton': 'Start Virtual Try-On',
+    'virtualTryOn.clearAllButton': 'Clear All',
+    'virtualTryOn.exampleBadge': 'Example',
+    
+    // Processing and Results
+    'virtualTryOn.uploadingImages': 'Uploading images...',
+    'virtualTryOn.processingWithAI': 'Processing with AI...',
+    'virtualTryOn.uploadingImagesDescription': 'Uploading your images to our servers...',
+    'virtualTryOn.aiProcessingDescription': 'Our AI is processing the images to create your virtual try-on. This can take a few minutes.',
+    'virtualTryOn.virtualTryOnResultTitle': 'Your Virtual Try-On Result!',
+    'virtualTryOn.resultReady': 'Your result is ready. How do you like how the garment looks?',
+    'virtualTryOn.downloadResultButton': 'Download Result',
+    'virtualTryOn.tryAnotherGarmentButton': 'Try Another Garment',
+    
+    // Working Best and Avoid sections
+    'virtualTryOn.whatWorksBestTitle': 'What works best:',
+    'virtualTryOn.whatWorksBestDescription': 'Front garment image with good lighting, on flat surface, shot from above, wrinkle-free',
+    'virtualTryOn.avoidTitle': 'Avoid:',
+    'virtualTryOn.avoidDescription': 'Poor lighting, folded sleeves, angled shots, messy backgrounds, shadows',
+    
+    // Error handling
+    'virtualTryOn.processingErrorTitle': 'Processing Error',
+    'virtualTryOn.processingErrorDescription': 'There was a problem processing the images. This usually happens with incompatible images.',
+    'virtualTryOn.tryExampleImagesFirst': 'Try using example images first',
+    'virtualTryOn.ensureFullBodyPerson': 'Ensure uploaded images show a clear full-body person',
+    'virtualTryOn.useGoodLightingContrast': 'Use images with good lighting and contrast',
+    'virtualTryOn.avoidComplexBackgrounds': 'Avoid images with complex backgrounds',
+    'virtualTryOn.technicalError': 'Technical error',
+    'virtualTryOn.unknownError': 'Unknown error',
+    'virtualTryOn.tryAgainButton': 'Try Again',
+    
+    // Modal titles
+    'virtualTryOn.selectModelExampleModalTitle': 'Select Example Model',
+    'virtualTryOn.selectGarmentExampleModalTitle': 'Select Example Garment',
+    'virtualTryOn.closeButton': 'Close',
     
     // Error messages
     'error.missingImages': 'Missing Images',
@@ -283,8 +346,71 @@ const translations: Record<Language, Record<string, string>> = {
     'virtualTryOn.downloadSuccess': '¡Éxito! Tu imagen ha sido descargada.',
     'virtualTryOn.downloadManual': 'Descargar Nuevamente',
     'virtualTryOn.pleaseUploadBoth': 'Por favor sube tanto una imagen del modelo como una prenda de vestir.',
-    'virtualTryOn.tipsTitle': 'Consejos para Mejores Resultados',
+    'virtualTryOn.suggestionsTitle': 'Sugerencias para mejores resultados:',
     'virtualTryOn.tipsDescription': 'Usa imágenes claras y de alta calidad con buena iluminación. El modelo debe estar mirando hacia adelante, y la prenda debe ser claramente visible contra un fondo neutro.',
+    
+    // Virtual Try-On AI Title and Steps
+    'virtualTryOn.aiTitle': 'Prueba Virtual IA',
+    'virtualTryOn.aiSubtitle': 'Prueba de ropa virtualmente usando inteligencia artificial avanzada',
+    'virtualTryOn.step1': '1. Seleccionar Tipo de Prenda',
+    'virtualTryOn.step2': '2. Subir Imágenes',
+    'virtualTryOn.step3': '3. Procesando',
+    'virtualTryOn.step4': '4. Resultado',
+    
+    // Garment Types
+    'virtualTryOn.garmentTypeQuestion': '¿Qué tipo de prenda quieres probar?',
+    'virtualTryOn.upperBody': 'Parte Superior',
+    'virtualTryOn.upperBodyDesc': 'Camisetas, camisas, sudaderas',
+    'virtualTryOn.lowerBody': 'Parte Inferior',
+    'virtualTryOn.lowerBodyDesc': 'Pantalones, jeans, shorts',
+    'virtualTryOn.dresses': 'Vestidos',
+    'virtualTryOn.dressesDesc': 'Casuales y formales',
+    'virtualTryOn.continueWith': 'Continuar con',
+    'virtualTryOn.continueButton': 'Continuar con Parte Superior',
+    
+    // Upload Section
+    'virtualTryOn.selectModel': 'Seleccionar Modelo',
+    'virtualTryOn.selectGarment': 'Seleccionar Prenda',
+    'virtualTryOn.viewExamples': 'Ver Ejemplos',
+    'virtualTryOn.dragOrClickToUpload': 'Arrastra una imagen o haz clic para subir',
+    'virtualTryOn.dragOrClickToUploadGarment': 'Arrastra una imagen de prenda superior o haz clic para subir',
+    'virtualTryOn.orUseExample': 'O usa uno de nuestros modelos de ejemplo',
+    'virtualTryOn.backButton': 'Volver Atrás',
+    'virtualTryOn.startVirtualTryOnButton': 'Iniciar Prueba Virtual',
+    'virtualTryOn.clearAllButton': 'Limpiar Todo',
+    'virtualTryOn.exampleBadge': 'Ejemplo',
+    
+    // Processing and Results
+    'virtualTryOn.uploadingImages': 'Subiendo imágenes...',
+    'virtualTryOn.processingWithAI': 'Procesando con IA...',
+    'virtualTryOn.uploadingImagesDescription': 'Subiendo tus imágenes a nuestros servidores...',
+    'virtualTryOn.aiProcessingDescription': 'Nuestra IA está procesando las imágenes para crear tu prueba virtual. Esto puede tomar unos minutos.',
+    'virtualTryOn.virtualTryOnResultTitle': '¡Tu Resultado de Prueba Virtual!',
+    'virtualTryOn.resultReady': 'Tu resultado está listo. ¿Qué te parece cómo se ve la prenda?',
+    'virtualTryOn.downloadResultButton': 'Descargar Resultado',
+    'virtualTryOn.tryAnotherGarmentButton': 'Probar Otra Prenda',
+    
+    // Working Best and Avoid sections
+    'virtualTryOn.whatWorksBestTitle': '¿Qué trabaja mejor?',
+    'virtualTryOn.whatWorksBestDescription': 'Imagen de prenda frontal con buena iluminación, sobre una superficie plana, disparada desde arriba, sin arrugas',
+    'virtualTryOn.avoidTitle': 'Evita:',
+    'virtualTryOn.avoidDescription': 'Iluminación deficiente, mangas plegadas, disparos angulares, fondos desordenados, sombras',
+    
+    // Error handling
+    'virtualTryOn.processingErrorTitle': 'Error de Procesamiento',
+    'virtualTryOn.processingErrorDescription': 'Hubo un problema al procesar las imágenes. Esto generalmente ocurre con imágenes incompatibles.',
+    'virtualTryOn.tryExampleImagesFirst': 'Intenta usar imágenes de ejemplo primero',
+    'virtualTryOn.ensureFullBodyPerson': 'Asegúrate de que las imágenes subidas muestren una persona completa de cuerpo',
+    'virtualTryOn.useGoodLightingContrast': 'Usa imágenes con buena iluminación y contraste',
+    'virtualTryOn.avoidComplexBackgrounds': 'Evita imágenes con fondos complejos',
+    'virtualTryOn.technicalError': 'Error técnico',
+    'virtualTryOn.unknownError': 'Error desconocido',
+    'virtualTryOn.tryAgainButton': 'Intentar de Nuevo',
+    
+    // Modal titles
+    'virtualTryOn.selectModelExampleModalTitle': 'Seleccionar Modelo de Ejemplo',
+    'virtualTryOn.selectGarmentExampleModalTitle': 'Seleccionar Prenda de Ejemplo',
+    'virtualTryOn.closeButton': 'Cerrar',
     
     // Error messages
     'error.missingImages': 'Imágenes Faltantes',
