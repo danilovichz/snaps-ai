@@ -1,428 +1,779 @@
 'use client';
-/*eslint-disable*/
-
-import Link from '@/components/link/Link';
-import MessageBoxChat from '@/components/MessageBox';
-import { ChatBody, OpenAIModel } from '@/types/types';
+import React, { Suspense, useState, useCallback } from 'react';
 import {
-  Accordion,
-  AccordionButton,
-  AccordionIcon,
-  AccordionItem,
-  AccordionPanel,
   Box,
   Button,
   Flex,
   Icon,
-  Img,
-  Input,
   Text,
   useColorModeValue,
+  VStack,
+  HStack,
+  Badge,
+  Progress,
+  SimpleGrid,
+  useToast,
+  Stepper,
+  Step,
+  StepIndicator,
+  StepStatus,
+  StepIcon,
+  StepNumber,
+  StepTitle,
+  StepDescription,
+  StepSeparator,
 } from '@chakra-ui/react';
-import { useEffect, useState } from 'react';
-import { MdAutoAwesome, MdBolt, MdEdit, MdPerson } from 'react-icons/md';
-import Bg from '../public/img/chat/bg-image.png';
+import { PageSkeleton } from '@/components/LoadingSkeleton';
+import { useLanguage } from '@/contexts/LanguageContext';
+import {
+  MdCloudUpload, 
+  MdImage,
+  MdDelete,
+  MdCheckCircle,
+  MdSettings,
+  MdPlayArrow,
+  MdDownload,
+  MdAutoAwesome,
+  MdStyle,
+  MdPalette,
+} from 'react-icons/md';
+import Card from '@/components/card/Card';
 
-export default function Chat(props: { apiKeyApp: string }) {
-  // Input States
-  const [inputOnSubmit, setInputOnSubmit] = useState<string>('');
-  const [inputCode, setInputCode] = useState<string>('');
-  // Response message
-  const [outputCode, setOutputCode] = useState<string>('');
-  // ChatGPT model
-  const [model, setModel] = useState<OpenAIModel>('gpt-4o');
-  // Loading state
-  const [loading, setLoading] = useState<boolean>(false);
+interface UploadedFile {
+  id: string;
+  file: File;
+  preview: string;
+  status: 'uploading' | 'uploaded' | 'error';
+  progress: number;
+}
 
-  // API Key
-  // const [apiKey, setApiKey] = useState<string>(apiKeyApp);
-  const borderColor = useColorModeValue('gray.200', 'whiteAlpha.200');
-  const inputColor = useColorModeValue('navy.700', 'white');
-  const iconColor = useColorModeValue('brand.500', 'white');
-  const bgIcon = useColorModeValue(
-    'linear-gradient(180deg, #FBFBFF 0%, #CACAFF 100%)',
-    'whiteAlpha.200',
-  );
-  const brandColor = useColorModeValue('brand.500', 'white');
-  const buttonBg = useColorModeValue('white', 'whiteAlpha.100');
-  const gray = useColorModeValue('gray.500', 'white');
-  const buttonShadow = useColorModeValue(
-    '14px 27px 45px rgba(112, 144, 176, 0.2)',
-    'none',
-  );
+type WorkflowStep = 'upload' | 'template' | 'processing' | 'review' | 'export';
+
+// Simple template interface for demo
+interface ProcessingTemplate {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+}
+
+// Note: Templates will be created inside component to access translations
+
+const ProcessorContent = () => {
+  const { t } = useLanguage();
+  
+  // Template definitions with translations
+  const templates: ProcessingTemplate[] = [
+    {
+      id: 'bg-remove',
+      name: t('template.bgRemoval'),
+      description: t('template.bgRemovalDesc'),
+      category: t('template.ecommerce')
+    },
+    {
+      id: 'bg-change',
+      name: t('template.bgChange'),
+      description: t('template.bgChangeDesc'),
+      category: t('template.creative')
+    },
+    {
+      id: 'enhance',
+      name: t('template.enhance'),
+      description: t('template.enhanceDesc'),
+      category: t('template.professional')
+    }
+  ];
+  
+  // Main workflow state
+  const [currentStep, setCurrentStep] = useState<WorkflowStep>('upload');
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
+  const [selectedTemplate, setSelectedTemplate] = useState<ProcessingTemplate>();
+  const [isDragOver, setIsDragOver] = useState(false);
+
+  const toast = useToast();
+
+  // Color mode values
   const textColor = useColorModeValue('navy.700', 'white');
-  const placeholderColor = useColorModeValue(
-    { color: 'gray.500' },
-    { color: 'whiteAlpha.600' },
-  );
-  const handleTranslate = async () => {
-    let apiKey = localStorage.getItem('apiKey');
-    setInputOnSubmit(inputCode);
+  const borderColor = useColorModeValue('gray.200', 'whiteAlpha.200');
+  const bgColor = useColorModeValue('gray.50', 'navy.800');
+  const cardBg = useColorModeValue('white', 'navy.800');
+  const brandColor = useColorModeValue('brand.500', 'white');
+  const gray = useColorModeValue('gray.500', 'gray.400');
 
-    // Chat post conditions(maximum number of characters, valid message etc.)
-    const maxCodeLength = model === 'gpt-4o' ? 700 : 700;
+  // Step configuration
+  const steps = [
+    { id: 'upload', title: t('workflow.upload'), description: t('workflow.upload.desc') },
+    { id: 'template', title: t('workflow.template'), description: t('workflow.template.desc') },
+    { id: 'processing', title: t('workflow.processing'), description: t('workflow.processing.desc') },
+    { id: 'review', title: t('workflow.review'), description: t('workflow.review.desc') },
+    { id: 'export', title: t('workflow.export'), description: t('workflow.export.desc') },
+  ];
 
-    if (!apiKey?.includes('sk-')) {
-      alert('Please enter an API key.');
-      return;
+  const getStepIndex = (step: WorkflowStep) => {
+    return steps.findIndex(s => s.id === step);
+  };
+
+  // Upload handlers
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+
+    const files = Array.from(e.dataTransfer.files);
+    handleFiles(files);
+  }, []);
+
+  const handleFileInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+      handleFiles(files);
     }
+  }, []);
 
-    if (!inputCode) {
-      alert('Please enter your message.');
-      return;
-    }
+  const handleFiles = (files: File[]) => {
+    const validFiles = files.filter(file => 
+      file.type.startsWith('image/') && 
+      ['image/jpeg', 'image/png', 'image/webp'].includes(file.type)
+    );
 
-    if (inputCode.length > maxCodeLength) {
-      alert(
-        `Please enter code less than ${maxCodeLength} characters. You are currently at ${inputCode.length} characters.`,
-      );
-      return;
-    }
-    setOutputCode(' ');
-    setLoading(true);
-    const controller = new AbortController();
-    const body: ChatBody = {
-      inputCode,
-      model,
-      apiKey,
-    };
+         if (validFiles.length !== files.length) {
+       toast({
+         title: t('processing.invalidFiles'),
+         description: t('processing.invalidFilesDesc'),
+         status: 'warning',
+         duration: 3000,
+         isClosable: true,
+       });
+     }
 
-    // -------------- Fetch --------------
-    const response = await fetch('./api/chatAPI', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      signal: controller.signal,
-      body: JSON.stringify(body),
-    });
+    const newFiles: UploadedFile[] = validFiles.map(file => ({
+      id: Math.random().toString(36).substr(2, 9),
+      file,
+      preview: URL.createObjectURL(file),
+      status: 'uploading',
+      progress: 0,
+    }));
 
-    if (!response.ok) {
-      setLoading(false);
-      if (response) {
-        alert(
-          'Something went wrong went fetching from the API. Make sure to use a valid API key.',
+    setUploadedFiles(prev => [...prev, ...newFiles]);
+
+    // Simulate upload progress
+    newFiles.forEach(fileData => {
+      const interval = setInterval(() => {
+        setUploadedFiles(prev => 
+          prev.map(f => 
+            f.id === fileData.id 
+              ? { ...f, progress: Math.min(f.progress + 10, 100) }
+              : f
+          )
         );
+      }, 200);
+
+      setTimeout(() => {
+        clearInterval(interval);
+        setUploadedFiles(prev => 
+          prev.map(f => 
+            f.id === fileData.id 
+              ? { ...f, status: 'uploaded', progress: 100 }
+              : f
+          )
+        );
+      }, 2000);
+    });
+  };
+
+  const removeFile = (id: string) => {
+    setUploadedFiles(prev => {
+      const file = prev.find(f => f.id === id);
+      if (file) {
+        URL.revokeObjectURL(file.preview);
       }
-      return;
-    }
-
-    const data = response.body;
-
-    if (!data) {
-      setLoading(false);
-      alert('Something went wrong');
-      return;
-    }
-
-    const reader = data.getReader();
-    const decoder = new TextDecoder();
-    let done = false;
-
-    while (!done) {
-      setLoading(true);
-      const { value, done: doneReading } = await reader.read();
-      done = doneReading;
-      const chunkValue = decoder.decode(value);
-      setOutputCode((prevCode) => prevCode + chunkValue);
-    }
-
-    setLoading(false);
+      return prev.filter(f => f.id !== id);
+    });
   };
-  // -------------- Copy Response --------------
-  // const copyToClipboard = (text: string) => {
-  //   const el = document.createElement('textarea');
-  //   el.value = text;
-  //   document.body.appendChild(el);
-  //   el.select();
-  //   document.execCommand('copy');
-  //   document.body.removeChild(el);
-  // };
 
-  // *** Initializing apiKey with .env.local value
-  // useEffect(() => {
-  // ENV file verison
-  // const apiKeyENV = process.env.NEXT_PUBLIC_OPENAI_API_KEY
-  // if (apiKey === undefined || null) {
-  //   setApiKey(apiKeyENV)
-  // }
-  // }, [])
+     const handleTemplateSelect = (template: ProcessingTemplate) => {
+     setSelectedTemplate(template);
+     toast({
+       title: t('processing.templateSelected'),
+       description: `${template.name} ${t('processing.templateSelectedDesc')}`,
+       status: 'success',
+       duration: 3000,
+       isClosable: true,
+     });
+   };
 
-  const handleChange = (Event: any) => {
-    setInputCode(Event.target.value);
+  const startProcessing = () => {
+    if (!selectedTemplate) return;
+    setCurrentStep('processing');
+    
+    // Simulate processing
+         setTimeout(() => {
+       setCurrentStep('review');
+       toast({
+         title: t('processing.complete'),
+         description: `${uploadedFiles.length} ${t('common.images')} ${t('processing.completeDesc')}`,
+         status: 'success',
+         duration: 5000,
+         isClosable: true,
+       });
+     }, 3000);
   };
+
+     const approveAndExport = () => {
+     setCurrentStep('export');
+     toast({
+       title: t('processing.exportComplete'),
+       description: t('processing.exportCompleteDesc'),
+       status: 'success',
+       duration: 5000,
+       isClosable: true,
+     });
+   };
+
+  const startOver = () => {
+    uploadedFiles.forEach(f => URL.revokeObjectURL(f.preview));
+    setUploadedFiles([]);
+    setSelectedTemplate(undefined);
+    setCurrentStep('upload');
+    
+         toast({
+       title: t('common.startOver'),
+       description: t('processing.startOverDesc'),
+       status: 'info',
+       duration: 3000,
+       isClosable: true,
+     });
+  };
+
+  const uploadedCount = uploadedFiles.filter(f => f.status === 'uploaded').length;
+  const totalFiles = uploadedFiles.length;
 
   return (
     <Flex
       w="100%"
-      pt={{ base: '70px', md: '0px' }}
       direction="column"
       position="relative"
+      pt={{ base: '70px', md: '0px' }}
     >
-      <Img
-        src={Bg.src}
-        position={'absolute'}
-        w="350px"
-        left="50%"
-        top="50%"
-        transform={'translate(-50%, -50%)'}
-      />
-      <Flex
-        direction="column"
-        mx="auto"
-        w={{ base: '100%', md: '100%', xl: '100%' }}
-        minH={{ base: '75vh', '2xl': '85vh' }}
-        maxW="1000px"
-      >
-        {/* Model Change */}
-        <Flex direction={'column'} w="100%" mb={outputCode ? '20px' : 'auto'}>
-          <Flex
-            mx="auto"
-            zIndex="2"
-            w="max-content"
-            mb="20px"
-            borderRadius="60px"
+      <VStack spacing="32px" align="stretch" maxW="1200px" mx="auto">
+        {/* Header */}
+        <Box>
+          <Text
+            color={textColor}
+            fontSize="2xl"
+            fontWeight="700"
+            mb="8px"
           >
-            <Flex
-              cursor={'pointer'}
-              transition="0.3s"
-              justify={'center'}
-              align="center"
-              bg={model === 'gpt-4o' ? buttonBg : 'transparent'}
-              w="174px"
-              h="70px"
-              boxShadow={model === 'gpt-4o' ? buttonShadow : 'none'}
-              borderRadius="14px"
-              color={textColor}
-              fontSize="18px"
-              fontWeight={'700'}
-              onClick={() => setModel('gpt-4o')}
-            >
-              <Flex
-                borderRadius="full"
-                justify="center"
-                align="center"
-                bg={bgIcon}
-                me="10px"
-                h="39px"
-                w="39px"
-              >
-                <Icon
-                  as={MdAutoAwesome}
-                  width="20px"
-                  height="20px"
-                  color={iconColor}
-                />
-              </Flex>
-              GPT-4o
-            </Flex>
-            <Flex
-              cursor={'pointer'}
-              transition="0.3s"
-              justify={'center'}
-              align="center"
-              bg={model === 'gpt-3.5-turbo' ? buttonBg : 'transparent'}
-              w="164px"
-              h="70px"
-              boxShadow={model === 'gpt-3.5-turbo' ? buttonShadow : 'none'}
-              borderRadius="14px"
-              color={textColor}
-              fontSize="18px"
-              fontWeight={'700'}
-              onClick={() => setModel('gpt-3.5-turbo')}
-            >
-              <Flex
-                borderRadius="full"
-                justify="center"
-                align="center"
-                bg={bgIcon}
-                me="10px"
-                h="39px"
-                w="39px"
-              >
-                <Icon
-                  as={MdBolt}
-                  width="20px"
-                  height="20px"
-                  color={iconColor}
-                />
-              </Flex>
-              GPT-3.5
-            </Flex>
-          </Flex>
-
-          <Accordion color={gray} allowToggle w="100%" my="0px" mx="auto">
-            <AccordionItem border="none">
-              <AccordionButton
-                borderBottom="0px solid"
-                maxW="max-content"
-                mx="auto"
-                _hover={{ border: '0px solid', bg: 'none' }}
-                _focus={{ border: '0px solid', bg: 'none' }}
-              >
-                <Box flex="1" textAlign="left">
-                  <Text color={gray} fontWeight="500" fontSize="sm">
-                    No plugins added
-                  </Text>
-                </Box>
-                <AccordionIcon color={gray} />
-              </AccordionButton>
-              <AccordionPanel mx="auto" w="max-content" p="0px 0px 10px 0px">
-                <Text
-                  color={gray}
-                  fontWeight="500"
-                  fontSize="sm"
-                  textAlign={'center'}
-                >
-                  This is a cool text example.
-                </Text>
-              </AccordionPanel>
-            </AccordionItem>
-          </Accordion>
-        </Flex>
-        {/* Main Box */}
-        <Flex
-          direction="column"
-          w="100%"
-          mx="auto"
-          display={outputCode ? 'flex' : 'none'}
-          mb={'auto'}
-        >
-          <Flex w="100%" align={'center'} mb="10px">
-            <Flex
-              borderRadius="full"
-              justify="center"
-              align="center"
-              bg={'transparent'}
-              border="1px solid"
-              borderColor={borderColor}
-              me="20px"
-              h="40px"
-              minH="40px"
-              minW="40px"
-            >
-              <Icon
-                as={MdPerson}
-                width="20px"
-                height="20px"
-                color={brandColor}
-              />
-            </Flex>
-            <Flex
-              p="22px"
-              border="1px solid"
-              borderColor={borderColor}
-              borderRadius="14px"
-              w="100%"
-              zIndex={'2'}
-            >
-              <Text
-                color={textColor}
-                fontWeight="600"
-                fontSize={{ base: 'sm', md: 'md' }}
-                lineHeight={{ base: '24px', md: '26px' }}
-              >
-                {inputOnSubmit}
-              </Text>
-              <Icon
-                cursor="pointer"
-                as={MdEdit}
-                ms="auto"
-                width="20px"
-                height="20px"
-                color={gray}
-              />
-            </Flex>
-          </Flex>
-          <Flex w="100%">
-            <Flex
-              borderRadius="full"
-              justify="center"
-              align="center"
-              bg={'linear-gradient(15.46deg, #4A25E1 26.3%, #7B5AFF 86.4%)'}
-              me="20px"
-              h="40px"
-              minH="40px"
-              minW="40px"
-            >
-              <Icon
-                as={MdAutoAwesome}
-                width="20px"
-                height="20px"
-                color="white"
-              />
-            </Flex>
-            <MessageBoxChat output={outputCode} />
-          </Flex>
-        </Flex>
-        {/* Chat Input */}
-        <Flex
-          ms={{ base: '0px', xl: '60px' }}
-          mt="20px"
-          justifySelf={'flex-end'}
-        >
-          <Input
-            minH="54px"
-            h="100%"
-            border="1px solid"
-            borderColor={borderColor}
-            borderRadius="45px"
-            p="15px 20px"
-            me="10px"
-            fontSize="sm"
-            fontWeight="500"
-            _focus={{ borderColor: 'none' }}
-            color={inputColor}
-            _placeholder={placeholderColor}
-            placeholder="Type your message here..."
-            onChange={handleChange}
-          />
-          <Button
-            variant="primary"
-            py="20px"
-            px="16px"
-            fontSize="sm"
-            borderRadius="45px"
-            ms="auto"
-            w={{ base: '160px', md: '210px' }}
-            h="54px"
-            _hover={{
-              boxShadow:
-                '0px 21px 27px -10px rgba(96, 60, 255, 0.48) !important',
-              bg: 'linear-gradient(15.46deg, #4A25E1 26.3%, #7B5AFF 86.4%) !important',
-              _disabled: {
-                bg: 'linear-gradient(15.46deg, #4A25E1 26.3%, #7B5AFF 86.4%)',
-              },
-            }}
-            onClick={handleTranslate}
-            isLoading={loading ? true : false}
-          >
-            Submit
-          </Button>
-        </Flex>
-
-        <Flex
-          justify="center"
-          mt="20px"
-          direction={{ base: 'column', md: 'row' }}
-          alignItems="center"
-        >
-          <Text fontSize="xs" textAlign="center" color={gray}>
-            Free Research Preview. ChatGPT may produce inaccurate information
-            about people, places, or facts.
+            {t('home.title')}
           </Text>
-          <Link href="https://help.openai.com/en/articles/6825453-chatgpt-release-notes">
-            <Text
-              fontSize="xs"
-              color={textColor}
-              fontWeight="500"
-              textDecoration="underline"
-            >
-              ChatGPT May 12 Version
-            </Text>
-          </Link>
-        </Flex>
-      </Flex>
-    </Flex>
+          <Text color={gray} fontSize="md" fontWeight="400">
+            {t('home.subtitle')}
+          </Text>
+        </Box>
+
+        {/* Progress Stepper */}
+        <Card>
+          <Stepper index={getStepIndex(currentStep)} colorScheme="brand">
+            {steps.map((step, index) => (
+              <Step key={index}>
+                <StepIndicator>
+                  <StepStatus
+                    complete={<StepIcon />}
+                    incomplete={<StepNumber />}
+                    active={<StepNumber />}
+                  />
+                </StepIndicator>
+
+                <Box flexShrink="0">
+                  <StepTitle>{step.title}</StepTitle>
+                  <StepDescription>{step.description}</StepDescription>
+                </Box>
+
+                <StepSeparator />
+              </Step>
+            ))}
+          </Stepper>
+        </Card>
+
+        {/* Step Content */}
+        {currentStep === 'upload' && (
+          <Card>
+            <VStack spacing="20px" align="stretch">
+              {/* Drag and Drop Zone */}
+              <Box
+                onDragEnter={handleDragEnter}
+                onDragLeave={handleDragLeave}
+                onDragOver={handleDragOver}
+                onDrop={handleDrop}
+                border="2px dashed"
+                borderColor={isDragOver ? brandColor : borderColor}
+                borderRadius="14px"
+                p="40px"
+                textAlign="center"
+                bg={isDragOver ? useColorModeValue('brand.50', 'whiteAlpha.50') : 'transparent'}
+                transition="all 0.2s"
+                cursor="pointer"
+                _hover={{
+                  borderColor: brandColor,
+                  bg: useColorModeValue('brand.50', 'whiteAlpha.50'),
+                }}
+                onClick={() => document.getElementById('file-input')?.click()}
+              >
+                <VStack spacing="16px">
+                  <Icon
+                    as={MdCloudUpload}
+                    w="48px"
+                    h="48px"
+                    color={isDragOver ? brandColor : gray}
+                  />
+                  <VStack spacing="8px">
+                    <Text
+                      color={textColor}
+                      fontSize="lg"
+                      fontWeight="600"
+                    >
+                      {t('upload.title')}
+                    </Text>
+                    <Text color={gray} fontSize="sm">
+                      {t('upload.subtitle')}
+                    </Text>
+                    <Text color={gray} fontSize="xs">
+                      {t('upload.formats')}
+                    </Text>
+                  </VStack>
+                  <Button
+                    variant="primary"
+                    size="md"
+                    leftIcon={<Icon as={MdImage} />}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      document.getElementById('file-input')?.click();
+                    }}
+                  >
+                    {t('upload.choose')}
+                  </Button>
+                </VStack>
+                
+                <input
+                  id="file-input"
+                  type="file"
+                  multiple
+                  accept="image/jpeg,image/png,image/webp"
+                  style={{ display: 'none' }}
+                  onChange={handleFileInput}
+                />
+              </Box>
+
+              {/* Upload Progress */}
+              {totalFiles > 0 && (
+                <Box>
+                  <Flex justify="space-between" align="center" mb="8px">
+                    <Text color={textColor} fontSize="sm" fontWeight="600">
+                      {t('upload.progress')}
+                    </Text>
+                    <Badge 
+                      colorScheme={uploadedCount === totalFiles ? 'green' : 'blue'}
+                      variant="subtle"
+                    >
+                      {uploadedCount}/{totalFiles} {t('upload.complete')}
+                    </Badge>
+                  </Flex>
+                  <Progress
+                    value={(uploadedCount / totalFiles) * 100}
+                    colorScheme="brand"
+                    size="sm"
+                    borderRadius="full"
+                  />
+                </Box>
+              )}
+
+              {/* Uploaded Files Preview */}
+              {uploadedFiles.length > 0 && (
+                <VStack spacing="16px" align="stretch">
+                                     <Flex justify="space-between" align="center">
+                     <Text color={textColor} fontSize="md" fontWeight="600">
+                       {t('processing.uploadedImages')} ({uploadedFiles.length})
+                     </Text>
+                    <Button
+                      variant="light"
+                      size="sm"
+                      leftIcon={<Icon as={MdDelete} />}
+                      onClick={() => {
+                        uploadedFiles.forEach(f => URL.revokeObjectURL(f.preview));
+                        setUploadedFiles([]);
+                      }}
+                    >
+                      {t('upload.clearAll')}
+                    </Button>
+                  </Flex>
+
+                  <SimpleGrid columns={{ base: 2, md: 4, lg: 6 }} spacing="16px">
+                    {uploadedFiles.map((fileData) => (
+                      <Box
+                        key={fileData.id}
+                        position="relative"
+                        borderRadius="10px"
+                        overflow="hidden"
+                        bg={cardBg}
+                        border="1px solid"
+                        borderColor={borderColor}
+                        _hover={{ transform: 'scale(1.02)' }}
+                        transition="all 0.2s"
+                      >
+                        <Box
+                          w="100%"
+                          h="120px"
+                          bgImage={`url(${fileData.preview})`}
+                          bgSize="cover"
+                          bgPosition="center"
+                          position="relative"
+                        >
+                          {fileData.status === 'uploading' && (
+                            <Box
+                              position="absolute"
+                              top="0"
+                              left="0"
+                              w="100%"
+                              h="100%"
+                              bg="blackAlpha.600"
+                              display="flex"
+                              alignItems="center"
+                              justifyContent="center"
+                              flexDirection="column"
+                            >
+                              <Text color="white" fontSize="xs" mb="4px">
+                                {t('upload.uploading')}
+                              </Text>
+                              <Progress
+                                value={fileData.progress}
+                                size="sm"
+                                colorScheme="brand"
+                                w="80%"
+                              />
+                            </Box>
+                          )}
+                          
+                          {fileData.status === 'uploaded' && (
+                            <Box
+                              position="absolute"
+                              top="4px"
+                              right="4px"
+                              bg="green.500"
+                              borderRadius="full"
+                              p="2px"
+                            >
+                              <Icon as={MdCheckCircle} color="white" w="12px" h="12px" />
+                            </Box>
+                          )}
+
+                          <Box
+                            position="absolute"
+                            top="4px"
+                            left="4px"
+                            bg="red.500"
+                            borderRadius="full"
+                            p="4px"
+                            cursor="pointer"
+                            _hover={{ bg: 'red.600' }}
+                            onClick={() => removeFile(fileData.id)}
+                          >
+                            <Icon as={MdDelete} color="white" w="12px" h="12px" />
+                          </Box>
+                        </Box>
+
+                        <Box p="8px">
+                          <Text
+                            color={textColor}
+                            fontSize="xs"
+                            fontWeight="500"
+                            noOfLines={1}
+                            title={fileData.file.name}
+                          >
+                            {fileData.file.name}
+                          </Text>
+                          <Text color={gray} fontSize="xs">
+                            {(fileData.file.size / (1024 * 1024)).toFixed(1)} {t('common.mb')}
+                          </Text>
+                        </Box>
+                      </Box>
+                    ))}
+                  </SimpleGrid>
+
+                  {uploadedCount > 0 && uploadedCount === totalFiles && (
+                    <Button
+                      variant="primary"
+                      size="lg"
+                      leftIcon={<Icon as={MdPlayArrow} />}
+                      onClick={() => setCurrentStep('template')}
+                    >
+                      {t('upload.continue')} ({uploadedCount} {t('common.images')})
+                    </Button>
+                  )}
+                </VStack>
+              )}
+            </VStack>
+          </Card>
+        )}
+
+        {currentStep === 'template' && (
+          <VStack spacing="20px" align="stretch">
+            <Card>
+              <VStack spacing="20px" align="stretch">
+                                 <Text color={textColor} fontSize="lg" fontWeight="600">
+                   {t('processing.chooseTemplate')}
+                 </Text>
+                <SimpleGrid columns={{ base: 1, md: 3 }} spacing="16px">
+                  {templates.map((template) => (
+                    <Box
+                      key={template.id}
+                      p="16px"
+                      border="2px solid"
+                      borderColor={selectedTemplate?.id === template.id ? brandColor : borderColor}
+                      borderRadius="12px"
+                      cursor="pointer"
+                      bg={selectedTemplate?.id === template.id ? useColorModeValue('brand.50', 'whiteAlpha.50') : 'transparent'}
+                      _hover={{ borderColor: brandColor }}
+                      onClick={() => handleTemplateSelect(template)}
+                    >
+                      <VStack spacing="8px" align="start">
+                        <Badge colorScheme="blue" variant="subtle">
+                          {template.category}
+                        </Badge>
+                        <Text color={textColor} fontSize="md" fontWeight="600">
+                          {template.name}
+                        </Text>
+                        <Text color={gray} fontSize="sm">
+                          {template.description}
+                        </Text>
+                      </VStack>
+                    </Box>
+                  ))}
+                </SimpleGrid>
+              </VStack>
+            </Card>
+            
+            {selectedTemplate && (
+              <Card>
+                <HStack justify="space-between" align="center">
+                  <VStack spacing="4px" align="start">
+                    <Text color={textColor} fontSize="md" fontWeight="600">
+                      {t('template.ready')}
+                    </Text>
+                    <Text color={gray} fontSize="sm">
+                      {uploadedCount} {t('template.willProcess')} {selectedTemplate.name}
+                    </Text>
+                  </VStack>
+                  
+                  <HStack spacing="12px">
+                    <Button
+                      variant="light"
+                      onClick={() => setCurrentStep('upload')}
+                    >
+                      {t('template.back')}
+                    </Button>
+                    <Button
+                      variant="primary"
+                      leftIcon={<Icon as={MdSettings} />}
+                      onClick={startProcessing}
+                    >
+                      {t('template.start')}
+                    </Button>
+                  </HStack>
+                </HStack>
+              </Card>
+            )}
+          </VStack>
+        )}
+
+        {currentStep === 'processing' && (
+          <Card>
+                         <VStack spacing="20px" align="center" py="40px">
+               <Icon as={MdSettings} w="48px" h="48px" color={brandColor} />
+               <Text color={textColor} fontSize="xl" fontWeight="600">
+                 {t('processing.enhancing')}
+               </Text>
+               <Text color={gray} fontSize="md">
+                 {t('processing.enhancingDesc')} {uploadedFiles.length} {t('common.images')}
+               </Text>
+              <Progress size="lg" colorScheme="brand" isIndeterminate w="300px" />
+            </VStack>
+          </Card>
+        )}
+
+        {currentStep === 'review' && (
+          <Card>
+                         <VStack spacing="20px" align="center" py="40px">
+               <Icon as={MdCheckCircle} w="48px" h="48px" color="green.500" />
+               <Text color={textColor} fontSize="xl" fontWeight="600">
+                 {t('processing.complete')}
+               </Text>
+               <Text color={gray} fontSize="md">
+                 {uploadedFiles.length} {t('common.images')} {t('processing.completeDesc')}
+               </Text>
+               <Button
+                 variant="primary"
+                 size="lg"
+                 leftIcon={<Icon as={MdDownload} />}
+                 onClick={approveAndExport}
+               >
+                 {t('processing.downloadProcessed')}
+               </Button>
+            </VStack>
+          </Card>
+        )}
+
+        {currentStep === 'export' && (
+          <Card>
+                         <VStack spacing="20px" align="center" py="40px">
+               <Icon as={MdDownload} w="48px" h="48px" color="green.500" />
+               <Text color={textColor} fontSize="xl" fontWeight="600">
+                 {t('processing.exportComplete')}
+               </Text>
+               <Text color={gray} fontSize="md">
+                 {t('processing.exportCompleteDesc')}
+               </Text>
+              <Button
+                variant="primary"
+                size="lg"
+                onClick={startOver}
+              >
+                {t('common.startOver')}
+              </Button>
+            </VStack>
+          </Card>
+                 )}
+
+         {/* Examples Section - Show after workflow is complete or as inspiration */}
+         {(currentStep === 'upload' && uploadedFiles.length === 0) && (
+           <VStack spacing="24px" align="stretch">
+             <Box>
+               <Text color={textColor} fontSize="xl" fontWeight="600" mb="8px">
+                 {t('examples.title')}
+               </Text>
+               <Text color={gray} fontSize="sm">
+                 {t('examples.subtitle')}
+               </Text>
+             </Box>
+
+             <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing="16px">
+               <Card>
+                 <VStack spacing="12px" align="start" p="16px">
+                   <HStack spacing="8px">
+                     <Box bg={useColorModeValue('purple.50', 'whiteAlpha.100')} p="8px" borderRadius="8px">
+                       <Icon as={MdImage} w="16px" h="16px" color="purple.500" />
+                     </Box>
+                     <Badge colorScheme="purple" variant="subtle" fontSize="xs">
+                       {t('template.ecommerce')}
+                     </Badge>
+                   </HStack>
+                   <Text color={textColor} fontSize="sm" fontWeight="600">
+                     {t('template.bgRemoval')}
+                   </Text>
+                   <Text color={gray} fontSize="xs" noOfLines={2}>
+                     {t('template.bgRemovalDesc')}
+                   </Text>
+                   <Box w="100%" h="2px" bg="purple.500" borderRadius="full" />
+                 </VStack>
+               </Card>
+
+               <Card>
+                 <VStack spacing="12px" align="start" p="16px">
+                   <HStack spacing="8px">
+                     <Box bg={useColorModeValue('blue.50', 'whiteAlpha.100')} p="8px" borderRadius="8px">
+                       <Icon as={MdAutoAwesome} w="16px" h="16px" color="blue.500" />
+                     </Box>
+                     <Badge colorScheme="blue" variant="subtle" fontSize="xs">
+                       {t('template.creative')}
+                     </Badge>
+                   </HStack>
+                   <Text color={textColor} fontSize="sm" fontWeight="600">
+                     {t('template.bgChange')}
+                   </Text>
+                   <Text color={gray} fontSize="xs" noOfLines={2}>
+                     {t('template.bgChangeDesc')}
+                   </Text>
+                   <Box w="100%" h="2px" bg="blue.500" borderRadius="full" />
+                 </VStack>
+               </Card>
+
+               <Card>
+                 <VStack spacing="12px" align="start" p="16px">
+                   <HStack spacing="8px">
+                     <Box bg={useColorModeValue('green.50', 'whiteAlpha.100')} p="8px" borderRadius="8px">
+                       <Icon as={MdStyle} w="16px" h="16px" color="green.500" />
+                     </Box>
+                     <Badge colorScheme="green" variant="subtle" fontSize="xs">
+                       {t('template.professional')}
+                     </Badge>
+                   </HStack>
+                   <Text color={textColor} fontSize="sm" fontWeight="600">
+                     {t('template.enhance')}
+                   </Text>
+                   <Text color={gray} fontSize="xs" noOfLines={2}>
+                     {t('template.enhanceDesc')}
+                   </Text>
+                   <Box w="100%" h="2px" bg="green.500" borderRadius="full" />
+                 </VStack>
+               </Card>
+
+               <Card>
+                 <VStack spacing="12px" align="start" p="16px">
+                   <HStack spacing="8px">
+                     <Box bg={useColorModeValue('orange.50', 'whiteAlpha.100')} p="8px" borderRadius="8px">
+                       <Icon as={MdPalette} w="16px" h="16px" color="orange.500" />
+                     </Box>
+                     <Badge colorScheme="orange" variant="subtle" fontSize="xs">
+                       {t('button.comingSoon')}
+                     </Badge>
+                   </HStack>
+                   <Text color={textColor} fontSize="sm" fontWeight="600">
+                     {t('tool.smartShadows')}
+                   </Text>
+                   <Text color={gray} fontSize="xs" noOfLines={2}>
+                     {t('tool.smartShadowsDesc')}
+                   </Text>
+                   <Box w="100%" h="2px" bg="orange.500" borderRadius="full" />
+                 </VStack>
+               </Card>
+             </SimpleGrid>
+
+             <Button
+               variant="light"
+               size="sm"
+               alignSelf="center"
+               rightIcon={<Icon as={MdPlayArrow} />}
+               onClick={() => window.location.href = '/examples'}
+             >
+               {t('examples.viewExamples')}
+             </Button>
+           </VStack>
+         )}
+       </VStack>
+     </Flex>
+   );
+ };
+
+export default function ImageProcessor() {
+  return (
+    <Suspense fallback={<PageSkeleton />}>
+      <ProcessorContent />
+    </Suspense>
   );
 }

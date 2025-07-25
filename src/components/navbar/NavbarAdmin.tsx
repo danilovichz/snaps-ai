@@ -11,6 +11,7 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react';
 import { useState, useEffect } from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
 import AdminNavbarLinks from './NavbarLinksAdmin';
 import { isWindowAvailable } from '@/utils/navigation';
 
@@ -19,9 +20,10 @@ export default function AdminNavbar(props: {
   brandText: string;
   logoText: string;
   onOpen: (...args: any[]) => any;
-  setApiKey: any;
+  setApiKey?: any;
 }) {
   const [scrolled, setScrolled] = useState(false);
+  const { t } = useLanguage();
 
   useEffect(() => {
     isWindowAvailable() && window.addEventListener('scroll', changeNavbar);
@@ -113,7 +115,7 @@ export default function AdminNavbar(props: {
           <Breadcrumb>
             <BreadcrumbItem color={secondaryText} fontSize="sm" mb="5px">
               <BreadcrumbLink href="#" color={secondaryText}>
-                Pages
+                {t('nav.pages')}
               </BreadcrumbLink>
             </BreadcrumbItem>
 

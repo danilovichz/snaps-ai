@@ -54,14 +54,13 @@ export default function SidebarDocs() {
           textAlign="center"
           mb="14px"
         >
-          Go unlimited with PRO
+          Upgrade to Pro
         </Text>
         <Text fontSize="14px" color={'white'} mb="14px" textAlign="center">
-          Get your AI Project to another level and start doing more with Horizon
-          AI Template PRO!
+          Process unlimited images, access premium templates, and get priority support with Fotin AI Pro!
         </Text>
       </Flex>
-      <Link href="https://horizon-ui.com/ai-template" isExternal>
+      <Link href="/account" >
         <Button
           bg="whiteAlpha.300"
           _hover={{ bg: 'whiteAlpha.200' }}
@@ -74,7 +73,7 @@ export default function SidebarDocs() {
           mx="auto"
           borderRadius="45px"
         >
-          Get started with PRO
+          Upgrade to Pro
         </Button>
       </Link>
     </Flex>

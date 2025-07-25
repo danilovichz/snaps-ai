@@ -9,8 +9,10 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react';
 import Link from '@/components/link/Link';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function Footer() {
+  const { t } = useLanguage();
   const textColor = useColorModeValue('gray.500', 'white');
   return (
     <Flex
@@ -37,7 +39,7 @@ export default function Footer() {
         {' '}
         &copy; {new Date().getFullYear()}
         <Text as="span" fontWeight="500" ms="4px">
-          Horizon UI AI Template. All Rights Reserved.
+          {t('footer.copyright')}
         </Text>
       </Text>
       <List display="flex">
@@ -51,9 +53,9 @@ export default function Footer() {
             fontWeight="500"
             fontSize={{ base: 'xs', md: 'sm' }}
             color={textColor}
-            href="https://horizon-ui.com/pro"
+            href="/examples"
           >
-            Homepage
+            {t('nav.examples')}
           </Link>
         </ListItem>
         <ListItem
@@ -66,9 +68,9 @@ export default function Footer() {
             fontWeight="500"
             fontSize={{ base: 'xs', md: 'sm' }}
             color={textColor}
-            href="https://horizon-ui.notion.site/End-User-License-Agreement-8fb09441ea8c4c08b60c37996195a6d5"
+            href="/templates"
           >
-            License
+            {t('nav.templates')}
           </Link>
         </ListItem>
         <ListItem
@@ -81,9 +83,9 @@ export default function Footer() {
             fontWeight="500"
             fontSize={{ base: 'xs', md: 'sm' }}
             color={textColor}
-            href="https://horizon-ui.notion.site/Terms-Conditions-6e79229d25ed48f48a481962bc6de3ee"
+            href="/account"
           >
-            Terms of Use
+            {t('footer.terms')}
           </Link>
         </ListItem>
         <ListItem>
@@ -91,9 +93,9 @@ export default function Footer() {
             fontWeight="500"
             fontSize={{ base: 'xs', md: 'sm' }}
             color={textColor}
-            href="https://horizon-ui.notion.site/Privacy-Policy-8addde50aa8e408ca5c5f5811c38f971"
+            href="/account"
           >
-            Privacy Policy
+            {t('footer.contact')}
           </Link>
         </ListItem>
       </List>

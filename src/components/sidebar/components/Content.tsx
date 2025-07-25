@@ -21,7 +21,6 @@ import { NextAvatar } from '@/components/image/Avatar';
 import APIModal from '@/components/apiModal';
 import Brand from '@/components/sidebar/components/Brand';
 import Links from '@/components/sidebar/components/Links';
-import SidebarCard from '@/components/sidebar/components/SidebarCard';
 import { RoundedChart } from '@/components/icons/Icons';
 import { PropsWithChildren } from 'react';
 import { IRoute } from '@/types/navigation';
@@ -29,6 +28,8 @@ import { IoMdPerson } from 'react-icons/io';
 import { FiLogOut } from 'react-icons/fi';
 import { LuHistory } from 'react-icons/lu';
 import { MdOutlineManageAccounts, MdOutlineSettings } from 'react-icons/md';
+import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
 
 // FUNCTIONS
 
@@ -38,7 +39,10 @@ interface SidebarContent extends PropsWithChildren {
 }
 
 function SidebarContent(props: SidebarContent) {
-  const { routes, setApiKey } = props;
+  const { routes, setApiKey = () => {} } = props;
+  const { user, signOut } = useAuth();
+  const router = useRouter();
+  
   const textColor = useColorModeValue('navy.700', 'white');
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.300');
   const bgColor = useColorModeValue('white', 'navy.700');
@@ -52,6 +56,28 @@ function SidebarContent(props: SidebarContent) {
     'none',
   );
   const gray = useColorModeValue('gray.500', 'white');
+
+  const handleSignOut = async () => {
+    const { error } = await signOut();
+    if (!error) {
+      router.push('/sign-in');
+    }
+  };
+
+  // Get user display name
+  const getUserDisplayName = () => {
+    if (user?.user_metadata?.full_name) {
+      return user.user_metadata.full_name;
+    }
+    if (user?.user_metadata?.first_name && user?.user_metadata?.last_name) {
+      return `${user.user_metadata.first_name} ${user.user_metadata.last_name}`;
+    }
+    if (user?.email) {
+      return user.email.split('@')[0];
+    }
+    return 'User';
+  };
+
   // SIDEBAR
   return (
     <Flex
@@ -70,10 +96,6 @@ function SidebarContent(props: SidebarContent) {
         </Box>
       </Stack>
 
-      <Box mt="60px" width={'100%'} display={'flex'} justifyContent={'center'}>
-        <SidebarCard />
-      </Box>
-      <APIModal setApiKey={setApiKey} sidebar={true} />
       <Flex
         mt="8px"
         justifyContent="center"
@@ -83,8 +105,8 @@ function SidebarContent(props: SidebarContent) {
         p="14px"
       >
         <NextAvatar h="34px" w="34px" src={avatar4} me="10px" />
-        <Text color={textColor} fontSize="xs" fontWeight="600" me="10px">
-          Adela Parkson
+        <Text color={textColor} fontSize="xs" fontWeight="600" me="10px" noOfLines={1}>
+          {getUserDisplayName()}
         </Text>
         <Menu>
           <MenuButton
@@ -126,138 +148,72 @@ function SidebarContent(props: SidebarContent) {
             bg={bgColor}
           >
             <Box mb="30px">
-              <Flex align="center" w="100%" cursor={'not-allowed'}>
+              <Flex align="center" w="100%" cursor={'pointer'} onClick={() => window.location.href = '/account'}>
                 <Icon
                   as={MdOutlineManageAccounts}
                   width="24px"
                   height="24px"
-                  color={gray}
+                  color={iconColor}
                   me="12px"
-                  opacity={'0.4'}
                 />
                 <Text
-                  color={gray}
+                  color={textColor}
                   fontWeight="500"
                   fontSize="sm"
-                  opacity={'0.4'}
                 >
-                  Profile Settings
+                  Account Settings
                 </Text>
-                <Link
-                  ms="auto"
-                  isExternal
-                  href="https://horizon-ui.com/ai-template"
-                >
-                  <Badge
-                    display={{ base: 'flex', lg: 'none', xl: 'flex' }}
-                    colorScheme="brand"
-                    borderRadius="25px"
-                    color="brand.500"
-                    textTransform={'none'}
-                    letterSpacing="0px"
-                    px="8px"
-                  >
-                    PRO
-                  </Badge>
-                </Link>
               </Flex>
             </Box>
             <Box mb="30px">
-              <Flex cursor={'not-allowed'} align="center">
+              <Flex cursor={'pointer'} align="center" onClick={() => window.location.href = '/history'}>
                 <Icon
                   as={LuHistory}
                   width="24px"
                   height="24px"
-                  color={gray}
-                  opacity="0.4"
+                  color={iconColor}
                   me="12px"
                 />
-                <Text color={gray} fontWeight="500" fontSize="sm" opacity="0.4">
-                  History
+                <Text color={textColor} fontWeight="500" fontSize="sm">
+                  Processing History
                 </Text>
-                <Link
-                  ms="auto"
-                  isExternal
-                  href="https://horizon-ui.com/ai-template"
-                >
-                  <Badge
-                    display={{ base: 'flex', lg: 'none', xl: 'flex' }}
-                    colorScheme="brand"
-                    borderRadius="25px"
-                    color="brand.500"
-                    textTransform={'none'}
-                    letterSpacing="0px"
-                    px="8px"
-                  >
-                    PRO
-                  </Badge>
-                </Link>
               </Flex>
             </Box>
             <Box mb="30px">
-              <Flex cursor={'not-allowed'} align="center">
+              <Flex cursor={'pointer'} align="center" onClick={() => window.location.href = '/account'}>
                 <Icon
                   as={RoundedChart}
                   width="24px"
                   height="24px"
-                  color={gray}
-                  opacity="0.4"
+                  color={iconColor}
                   me="12px"
                 />
-                <Text color={gray} fontWeight="500" fontSize="sm" opacity="0.4">
-                  Usage
+                <Text color={textColor} fontWeight="500" fontSize="sm">
+                  Usage & Billing
                 </Text>
-                <Link
-                  ms="auto"
-                  isExternal
-                  href="https://horizon-ui.com/ai-template"
-                >
-                  <Badge
-                    display={{ base: 'flex', lg: 'none', xl: 'flex' }}
-                    colorScheme="brand"
-                    borderRadius="25px"
-                    color="brand.500"
-                    textTransform={'none'}
-                    letterSpacing="0px"
-                    px="8px"
-                  >
-                    PRO
-                  </Badge>
-                </Link>
               </Flex>
             </Box>
-            <Box>
-              <Flex cursor={'not-allowed'} align="center">
-                <Icon
-                  as={IoMdPerson}
-                  width="24px"
-                  height="24px"
-                  color={gray}
-                  opacity="0.4"
-                  me="12px"
-                />
-                <Text color={gray} fontWeight="500" fontSize="sm" opacity="0.4">
-                  My Plan
-                </Text>
-                <Link
-                  ms="auto"
-                  isExternal
-                  href="https://horizon-ui.com/ai-template"
-                >
-                  <Badge
-                    display={{ base: 'flex', lg: 'none', xl: 'flex' }}
-                    colorScheme="brand"
-                    borderRadius="25px"
-                    color="brand.500"
-                    textTransform={'none'}
-                    letterSpacing="0px"
-                    px="8px"
-                  >
-                    PRO
-                  </Badge>
-                </Link>
-              </Flex>
-            </Box>
+            {user?.email && (
+              <Box mb="30px">
+                <Flex align="center">
+                  <Icon
+                    as={IoMdPerson}
+                    width="24px"
+                    height="24px"
+                    color={iconColor}
+                    me="12px"
+                  />
+                  <Box>
+                    <Text color={textColor} fontWeight="500" fontSize="sm">
+                      {user.email}
+                    </Text>
+                    <Text color={gray} fontSize="xs">
+                      {user.email_confirmed_at ? 'Verified' : 'Pending verification'}
+                    </Text>
+                  </Box>
+                </Flex>
+              </Box>
+            )}
           </MenuList>
         </Menu>
         <Button
@@ -271,6 +227,8 @@ function SidebarContent(props: SidebarContent) {
           minW="34px"
           justifyContent={'center'}
           alignItems="center"
+          onClick={handleSignOut}
+          title="Sign Out"
         >
           <Icon as={FiLogOut} width="16px" height="16px" color="inherit" />
         </Button>
