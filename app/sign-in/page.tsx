@@ -12,13 +12,14 @@ import {
   Text,
   VStack,
   Link,
-  useColorModeValue,
   useToast,
   Spinner,
   Icon,
+  HStack,
+  Divider,
 } from '@chakra-ui/react';
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
-import { MdEmail, MdArrowForward } from 'react-icons/md';
+import { FaGoogle, FaFacebook } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -34,14 +35,6 @@ export default function SignIn() {
   const { t } = useLanguage();
   const router = useRouter();
   const toast = useToast();
-  
-  // Color mode values
-  const bgOverlay = useColorModeValue('rgba(255, 255, 255, 0.1)', 'rgba(0, 0, 0, 0.3)');
-  const cardBg = useColorModeValue('rgba(255, 255, 255, 0.95)', 'rgba(26, 32, 44, 0.95)');
-  const textColor = useColorModeValue('gray.800', 'white');
-  const brandColor = useColorModeValue('brand.500', 'brand.400');
-  const inputBg = useColorModeValue('rgba(255, 255, 255, 0.9)', 'rgba(45, 55, 72, 0.9)');
-  const borderColor = useColorModeValue('rgba(226, 232, 240, 0.8)', 'rgba(74, 85, 104, 0.8)');
 
   // Redirect if already logged in
   useEffect(() => {
@@ -70,7 +63,6 @@ export default function SignIn() {
     const { error } = await signIn(email, password);
     
     if (!error) {
-      // Success is handled by AuthContext
       setIsRedirecting(true);
       router.push('/');
     }
@@ -80,28 +72,10 @@ export default function SignIn() {
 
   if (authLoading || isRedirecting) {
     return (
-      <Flex
-        minH="100vh"
-        align="center"
-        justify="center"
-        bgImage="url('/img/auth-bg.jpg')"
-        bgSize="cover"
-        bgPosition="center"
-        bgRepeat="no-repeat"
-        _before={{
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          bg: bgOverlay,
-          backdropFilter: 'blur(20px)',
-        }}
-      >
-        <VStack spacing={4} position="relative" zIndex={1}>
-          <Spinner size="xl" color={brandColor} thickness="4px" />
-          <Text color="white" fontWeight="600" fontSize="lg">
+      <Flex minH="100vh" align="center" justify="center" bg="white">
+        <VStack spacing={4}>
+          <Spinner size="xl" color="blue.500" thickness="4px" />
+          <Text color="gray.600" fontWeight="600" fontSize="lg">
             {isRedirecting ? 'Welcome back! Redirecting...' : 'Loading...'}
           </Text>
         </VStack>
@@ -110,197 +84,179 @@ export default function SignIn() {
   }
 
   return (
-    <Flex
-      minH="100vh"
-      align="center"
-      justify="center"
-      bgImage="url('/img/auth-bg.jpg')"
-      bgSize="cover"
-      bgPosition="center"
-      bgRepeat="no-repeat"
-      px={4}
-      _before={{
-        content: '""',
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        bg: bgOverlay,
-        backdropFilter: 'blur(20px)',
-      }}
-    >
+    <Flex minH="100vh" direction={{ base: 'column', lg: 'row' }}>
+      {/* Left side - Login Form */}
       <Box
-        position="relative"
-        zIndex={1}
-        maxW="500px"
-        w="full"
-        bg={cardBg}
-        backdropFilter="blur(40px)"
-        boxShadow="0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.2)"
-        rounded="3xl"
-        p={12}
-        border="1px solid"
-        borderColor="rgba(255, 255, 255, 0.2)"
+        flex="1"
+        maxW={{ base: '100%', lg: '50%' }}
+        bg="white"
+        p={{ base: 8, md: 12, lg: 16 }}
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
       >
-        <VStack spacing={8} align="stretch">
-          {/* Logo and Header */}
-          <VStack spacing={6}>
-            <Box
-              p={4}
-              bg="rgba(255, 255, 255, 0.1)"
-              borderRadius="2xl"
-              backdropFilter="blur(10px)"
-            >
+        <Box w="full" maxW="400px">
+          <VStack spacing={8} align="stretch">
+            {/* Logo and Header */}
+            <VStack spacing={6} textAlign="left" align="flex-start">
               <img
                 src="/img/snaps-logo.png"
                 alt="Snaps Logo"
                 style={{
-                  height: '80px',
+                  height: '60px',
                   width: 'auto',
-                  maxWidth: '250px',
+                  maxWidth: '200px',
                   objectFit: 'contain'
                 }}
               />
-            </Box>
-            <VStack spacing={2} textAlign="center">
-              <Text fontSize="3xl" fontWeight="800" color={textColor} letterSpacing="-0.02em">
-                Welcome back
-              </Text>
-              <Text fontSize="lg" color="gray.600" fontWeight="500">
-                Sign in to your Snaps account
-              </Text>
+              <VStack spacing={2} align="flex-start">
+                <Text fontSize="2xl" fontWeight="600" color="gray.900">
+                  Comienza tu experiencia
+                </Text>
+                <Text fontSize="md" color="gray.600" fontWeight="400">
+                  Inicia sesión para reservar o gestionar tus sesiones fotográficas
+                </Text>
+              </VStack>
             </VStack>
-          </VStack>
 
-          {/* Sign In Form */}
-          <form onSubmit={handleSubmit}>
-            <VStack spacing={6}>
-              <FormControl>
-                <FormLabel color={textColor} fontSize="sm" fontWeight="600" mb={3}>
-                  Email Address
-                </FormLabel>
-                <InputGroup size="lg">
+            {/* Sign In Form */}
+            <form onSubmit={handleSubmit}>
+              <VStack spacing={6}>
+                <FormControl>
+                  <FormLabel color="gray.700" fontSize="sm" fontWeight="500" mb={2}>
+                    Correo electrónico
+                  </FormLabel>
                   <Input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter your email"
-                    bg={inputBg}
+                    placeholder="ejemplo@email.com"
+                    bg="white"
                     border="1px solid"
-                    borderColor={borderColor}
-                    borderRadius="xl"
+                    borderColor="gray.300"
+                    borderRadius="lg"
                     fontSize="md"
+                    h="48px"
                     _hover={{ 
-                      borderColor: brandColor,
-                      boxShadow: '0 0 0 1px rgba(124, 58, 237, 0.2)'
+                      borderColor: "blue.400"
                     }}
                     _focus={{ 
-                      borderColor: brandColor,
-                      boxShadow: '0 0 0 3px rgba(124, 58, 237, 0.1)'
+                      borderColor: "blue.500",
+                      boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)'
                     }}
                   />
-                  <InputRightElement h="full">
-                    <Icon as={MdEmail} color="gray.400" />
-                  </InputRightElement>
-                </InputGroup>
-              </FormControl>
+                </FormControl>
 
-              <FormControl>
-                <FormLabel color={textColor} fontSize="sm" fontWeight="600" mb={3}>
-                  Password
-                </FormLabel>
-                <InputGroup size="lg">
-                  <Input
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
-                    bg={inputBg}
-                    border="1px solid"
-                    borderColor={borderColor}
-                    borderRadius="xl"
-                    fontSize="md"
-                    _hover={{ 
-                      borderColor: brandColor,
-                      boxShadow: '0 0 0 1px rgba(124, 58, 237, 0.2)'
-                    }}
-                    _focus={{ 
-                      borderColor: brandColor,
-                      boxShadow: '0 0 0 3px rgba(124, 58, 237, 0.1)'
-                    }}
-                  />
-                  <InputRightElement h="full">
-                    <Button
-                      variant="ghost"
-                      onClick={() => setShowPassword(!showPassword)}
-                      size="sm"
+                <FormControl>
+                  <FormLabel color="gray.700" fontSize="sm" fontWeight="500" mb={2}>
+                    Contraseña
+                  </FormLabel>
+                  <InputGroup>
+                    <Input
+                      type={showPassword ? 'text' : 'password'}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      bg="white"
+                      border="1px solid"
+                      borderColor="gray.300"
                       borderRadius="lg"
-                    >
-                      {showPassword ? <ViewOffIcon /> : <ViewIcon />}
-                    </Button>
-                  </InputRightElement>
-                </InputGroup>
-              </FormControl>
+                      fontSize="md"
+                      h="48px"
+                      _hover={{ 
+                        borderColor: "blue.400"
+                      }}
+                      _focus={{ 
+                        borderColor: "blue.500",
+                        boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)'
+                      }}
+                    />
+                    <InputRightElement h="48px">
+                      <Button
+                        variant="ghost"
+                        onClick={() => setShowPassword(!showPassword)}
+                        size="sm"
+                        color="gray.400"
+                      >
+                        {showPassword ? <ViewOffIcon /> : <ViewIcon />}
+                      </Button>
+                    </InputRightElement>
+                  </InputGroup>
+                </FormControl>
 
-              {/* Forgot Password */}
-              <Flex justify="flex-end" w="full">
-                <Link
-                  href="/forgot-password"
-                  color={brandColor}
-                  fontSize="sm"
+                {/* Sign In Button */}
+                <Button
+                  type="submit"
+                  w="full"
+                  h="48px"
+                  bg="blue.500"
+                  color="white"
+                  fontSize="md"
                   fontWeight="600"
-                  _hover={{ textDecoration: 'underline', color: 'brand.600' }}
+                  borderRadius="lg"
+                  isLoading={isLoading}
+                  loadingText="Iniciando sesión..."
+                  _hover={{
+                    bg: "blue.600"
+                  }}
+                  _active={{
+                    bg: "blue.700"
+                  }}
                 >
-                  Forgot password?
-                </Link>
-              </Flex>
+                  Iniciar sesión
+                </Button>
+              </VStack>
+            </form>
 
-              {/* Sign In Button */}
+            {/* Divider */}
+            <HStack spacing={4}>
+              <Divider />
+              <Text color="gray.500" fontSize="sm" whiteSpace="nowrap">
+                O CONTINÚA CON
+              </Text>
+              <Divider />
+            </HStack>
+
+            {/* Social Login Buttons */}
+            <VStack spacing={3}>
               <Button
-                type="submit"
-                colorScheme="brand"
                 w="full"
-                size="lg"
-                height="56px"
-                fontSize="md"
-                fontWeight="700"
-                borderRadius="xl"
-                isLoading={isLoading}
-                loadingText="Signing in..."
-                rightIcon={<Icon as={MdArrowForward} />}
-                bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
-                _hover={{
-                  bg: "linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)",
-                  transform: "translateY(-2px)",
-                  boxShadow: "0 10px 25px rgba(124, 58, 237, 0.3)"
-                }}
-                _active={{
-                  transform: "translateY(0px)",
-                }}
-                transition="all 0.2s"
+                h="48px"
+                variant="outline"
+                borderColor="gray.300"
+                borderRadius="lg"
+                leftIcon={<Icon as={FaGoogle} color="red.500" />}
+                _hover={{ bg: "gray.50" }}
               >
-                Sign In
+                Google
+              </Button>
+              <Button
+                w="full"
+                h="48px"
+                variant="outline"
+                borderColor="gray.300"
+                borderRadius="lg"
+                leftIcon={<Icon as={FaFacebook} color="blue.600" />}
+                _hover={{ bg: "gray.50" }}
+              >
+                Facebook
               </Button>
             </VStack>
-          </form>
-
-
-
-          {/* Sign Up Link */}
-          <Text textAlign="center" fontSize="md" color="gray.600" fontWeight="500">
-            Don't have an account?{' '}
-            <Link
-              href="/register"
-              color={brandColor}
-              fontWeight="700"
-              _hover={{ textDecoration: 'underline', color: 'brand.600' }}
-            >
-              Create one now
-            </Link>
-          </Text>
-        </VStack>
+          </VStack>
+        </Box>
       </Box>
+
+      {/* Right side - Gradient Background */}
+      <Box
+        flex="1"
+        minW={{ base: '100%', lg: '50%' }}
+        minH={{ base: '200px', lg: '100vh' }}
+        bgImage="url('/img/auth-bg-gradient.jpg')"
+        bgSize="cover"
+        bgPosition="center"
+        bgRepeat="no-repeat"
+        display={{ base: 'none', lg: 'block' }}
+      />
     </Flex>
   );
 } 

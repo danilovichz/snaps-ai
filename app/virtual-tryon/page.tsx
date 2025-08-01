@@ -535,7 +535,7 @@ export default function VirtualTryOnPage() {
                   >
                     <VStack spacing="12px" align="center">
                       <TshirtIcon 
-                        color={garmentType === 'upper_body' ? 'white' : 'blue.500'} 
+                        color={garmentType === 'upper_body' ? 'white' : '#2D3748'} 
                         width="48px" 
                         height="48px" 
                         style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }}
@@ -577,7 +577,7 @@ export default function VirtualTryOnPage() {
                   >
                     <VStack spacing="12px" align="center">
                       <PantsIcon 
-                        color={garmentType === 'lower_body' ? 'white' : 'blue.500'} 
+                        color={garmentType === 'lower_body' ? 'white' : '#2D3748'} 
                         width="48px" 
                         height="48px" 
                         style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }}
@@ -619,7 +619,7 @@ export default function VirtualTryOnPage() {
                   >
                     <VStack spacing="12px" align="center">
                       <DressIcon 
-                        color={garmentType === 'dresses' ? 'white' : 'blue.500'} 
+                        color={garmentType === 'dresses' ? 'white' : '#2D3748'} 
                         width="48px" 
                         height="48px" 
                         style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }}
@@ -650,7 +650,11 @@ export default function VirtualTryOnPage() {
                   onClick={() => setCurrentStep('upload')}
                   rightIcon={<Icon as={MdAutoAwesome} />}
                 >
-                  {t('virtualTryOn.continueButton')}
+                  {t('virtualTryOn.continueWith')} {
+                    garmentType === 'upper_body' ? t('virtualTryOn.upperBody') :
+                    garmentType === 'lower_body' ? t('virtualTryOn.lowerBody') :
+                    t('virtualTryOn.dresses')
+                  }
                 </Button>
               </VStack>
             </Card>

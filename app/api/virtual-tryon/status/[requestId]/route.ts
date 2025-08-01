@@ -1,118 +1,100 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { fal } from '@fal-ai/client';
-
-// Configure fal.ai client
-fal.config({
-  credentials: process.env.FAL_API_KEY || 'your_fal_api_key_here'
-});
+import { runningHubClient } from '@/utils/runninghub-client';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ requestId: string }> }
 ) {
   const { requestId } = await params;
-  
-  try {
 
-    if (!requestId) {
-      return NextResponse.json(
-        { error: 'Missing requestId parameter' },
-        { status: 400 }
-      );
+  if (!requestId) {
+    return NextResponse.json(
+      { error: 'Missing requestId parameter' },
+      { status: 400 }
+    );
+  }
+
+  try {
+    console.log('🔍 Checking FitDiT status on RunningHub for request:', requestId);
+    
+    // Get workflow status from RunningHub
+    const status = await runningHubClient.getStatus(requestId);
+    
+    let responseStatus: 'IN_QUEUE' | 'IN_PROGRESS' | 'COMPLETED' | 'FAILED';
+    let resultUrl: string | undefined;
+    
+    switch (status.status) {
+      case 'pending':
+        responseStatus = 'IN_QUEUE';
+        break;
+      case 'running':
+        responseStatus = 'IN_PROGRESS';
+        break;
+      case 'success':
+        responseStatus = 'COMPLETED';
+        // When task completes, fetch the actual result URL
+        const results = await runningHubClient.getResults(requestId);
+        resultUrl = results.result_url;
+        break;
+      case 'failed':
+        responseStatus = 'FAILED';
+        break;
+      default:
+        responseStatus = 'IN_QUEUE';
     }
 
-    console.log('Checking status for request:', requestId);
-
-    // Check status of the request
-    const status = await fal.queue.status('fal-ai/leffa/virtual-tryon', {
-      requestId
-    });
-
-    console.log('Status response:', status);
-
-    // Transform the response to match our frontend expectations
-    let transformedStatus: {
-      requestId: string;
-      status: 'IN_QUEUE' | 'IN_PROGRESS' | 'COMPLETED' | 'FAILED';
-      queuePosition?: number;
-      resultUrl?: string;
-      error?: {
-        message: string;
-        details: string;
-        suggestions: string[];
-      };
-    } = {
-      requestId,
-      status: 'IN_QUEUE'
-    };
-
-    // Map fal.ai status to our status format
-    const statusValue = status.status as string;
-    
-    if (statusValue === 'COMPLETED') {
-      transformedStatus.status = 'COMPLETED';
-      
-      // Get the result if completed
-      try {
-        const result = await fal.queue.result('fal-ai/leffa/virtual-tryon', {
-          requestId
-        });
-        
-        console.log('Result data:', result);
-        
-        // Extract the image URL from the result
-        if (result.data && result.data.image && result.data.image.url) {
-          transformedStatus.resultUrl = result.data.image.url;
-        }
-      } catch (resultError) {
-        console.error('❌ Error fetching result:', resultError);
-        console.error('❌ Error details:', resultError instanceof Error ? resultError.message : 'Unknown error');
-        
-        // Add detailed error info to response
-        transformedStatus.error = {
-          message: resultError instanceof Error ? resultError.message : 'Unknown error',
-          details: 'Failed to fetch result from fal.ai. This often happens with incompatible images.',
+    const response = {
+      status: responseStatus,
+      request_id: requestId,
+      ...(status.queue_position && { queuePosition: status.queue_position }),
+      ...(resultUrl && { resultUrl }),
+      ...(status.error && { 
+        error: {
+          message: status.error,
+          details: status.error,
           suggestions: [
             'Try using example images first',
             'Ensure uploaded images show a clear full-body person',
             'Use images with good lighting and contrast',
             'Avoid images with complex backgrounds'
           ]
-        };
-      }
-    } else if (statusValue === 'IN_PROGRESS') {
-      transformedStatus.status = 'IN_PROGRESS';
-    } else if (statusValue === 'FAILED') {
-      transformedStatus.status = 'FAILED';
-    } else {
-      transformedStatus.status = 'IN_QUEUE';
-      // Add queue position if available
-      if ('queue_position' in status && typeof status.queue_position === 'number') {
-        transformedStatus.queuePosition = status.queue_position;
-      }
-    }
+        }
+      })
+    };
 
-    return NextResponse.json(transformedStatus);
+    console.log('📊 RunningHub FitDiT status response:', response);
+    return NextResponse.json(response);
 
   } catch (error) {
-    console.error('Error checking status:', error);
+    console.error('❌ Error checking RunningHub FitDiT status:', error);
     
-    // Handle specific error cases
-    if (error instanceof Error && error.message.includes('not found')) {
-      return NextResponse.json(
-        { 
-          requestId: requestId,
-          status: 'NOT_FOUND',
-          error: 'Request not found'
-        },
-        { status: 404 }
-      );
+    // Handle connection errors gracefully
+    if (error instanceof Error) {
+      if (error.message.includes('ECONNREFUSED')) {
+        return NextResponse.json(
+          { 
+            error: 'RunningHub service unavailable',
+            details: 'Could not connect to RunningHub API. Please try again later.',
+            status: 'FAILED'
+          },
+          { status: 503 }
+        );
+      }
+      
+      if (error.message.includes('NOT_FOUND')) {
+        return NextResponse.json(
+          { 
+            error: 'Request not found',
+            details: 'The requested task was not found on RunningHub.',
+            status: 'FAILED'
+          },
+          { status: 404 }
+        );
+      }
     }
     
     return NextResponse.json(
       { 
-        requestId: requestId,
-        status: 'ERROR',
         error: 'Failed to check request status',
         details: error instanceof Error ? error.message : 'Unknown error'
       },

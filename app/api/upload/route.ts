@@ -1,12 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { fal } from '@fal-ai/client';
-
-// Configure fal.ai client
-const FAL_API_KEY = process.env.FAL_API_KEY || '92601bf8-cf46-41ca-9d31-cc2ac341b268:a1221eccaf65a000115c08f67902404f';
-
-fal.config({
-  credentials: FAL_API_KEY,
-});
+import { runningHubClient } from '@/utils/runninghub-client';
 
 export async function POST(request: NextRequest) {
   try {
@@ -32,10 +25,10 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Validate file size (max 5MB for better compatibility)
-    if (file.size > 5 * 1024 * 1024) {
+    // Validate file size (max 10MB for RunningHub)
+    if (file.size > 10 * 1024 * 1024) {
       return NextResponse.json(
-        { error: 'File size must be less than 5MB for optimal processing' },
+        { error: 'File size must be less than 10MB for RunningHub processing' },
         { status: 400 }
       );
     }
@@ -48,24 +41,28 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    console.log(`Uploading file: ${file.name} (${file.size} bytes, ${file.type})`);
+    console.log(`📤 Uploading file to RunningHub: ${file.name} (${file.size} bytes, ${file.type})`);
     
-    // Upload file to fal.ai storage
-    const uploadedUrl = await fal.storage.upload(file);
+    // Upload file to RunningHub storage
+    const uploadedUrl = await runningHubClient.uploadImage(file);
     
-    console.log(`File uploaded successfully: ${uploadedUrl}`);
+    console.log(`✅ File uploaded successfully to RunningHub: ${uploadedUrl}`);
     
     return NextResponse.json({
       url: uploadedUrl,
       filename: file.name,
       size: file.size,
       type: file.type,
+      provider: 'runninghub'
     });
     
   } catch (error) {
-    console.error('Upload error:', error);
+    console.error('❌ RunningHub upload error:', error);
     return NextResponse.json(
-      { error: 'Failed to process upload', details: error instanceof Error ? error.message : String(error) },
+      { 
+        error: 'Failed to upload to RunningHub', 
+        details: error instanceof Error ? error.message : String(error) 
+      },
       { status: 500 }
     );
   }
