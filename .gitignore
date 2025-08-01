@@ -40,3 +40,4 @@ coverage/
 # Personal scripts (keep local)
 create-master-user-snaps.js
 setup-snaps-project.sql
+.env
